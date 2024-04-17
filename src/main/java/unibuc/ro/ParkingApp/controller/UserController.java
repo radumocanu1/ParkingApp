@@ -9,9 +9,10 @@ import unibuc.ro.ParkingApp.model.User;
 import unibuc.ro.ParkingApp.service.UserService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 
 public class UserController {
     @Autowired
@@ -24,6 +25,10 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<List<User>> getAllUsers(){
         return userService.getAllUsers();
+    }
+    @GetMapping("/{uuid}")
+    public ResponseEntity<User> getUser(@PathVariable UUID uuid){
+        return userService.getUserById(uuid);
     }
 
 }

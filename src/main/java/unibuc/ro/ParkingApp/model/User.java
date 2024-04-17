@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import unibuc.ro.ParkingApp.validator.UserEmailValidator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,7 +21,7 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    UUID uuid;
+    UUID userUUID;
     @NotBlank(message = "Username is required")
     String username;
     @NotBlank(message = "Email is required")
@@ -27,4 +29,8 @@ public class User {
     String email;
     @NotBlank(message = "Password is required")
     String password;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Feedback> feedbackList = new ArrayList<>();
+    private boolean isTrusted;
+    private double rating;
 }
