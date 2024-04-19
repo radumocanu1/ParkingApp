@@ -1,20 +1,20 @@
 package unibuc.ro.ParkingApp.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.util.UUID;
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class FeedbackRequest {
-    private UUID userToReceiveFeedback;
-    private UUID feedbackAuthor ;
+    @NotNull(message = "Author feedback is required")
+    private UUID feedbackAuthor;
     private String message;
+    @NotNull(message = "You are required to provide a rating")
     private int ratingGiven;
+    private boolean isAnonymous;
 
 }

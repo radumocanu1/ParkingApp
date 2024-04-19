@@ -25,14 +25,17 @@ public class UserService {
 
     }
 
-    public ResponseEntity<User> createUser(User user){
+    public User createUser(User user){
         repository.save(user);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return user;
 
     }
-    public ResponseEntity<User> getUserById(UUID uuid){
-
-        return new ResponseEntity<>(tryToGetUser(uuid), HttpStatus.OK);
+    public User getUserById(UUID uuid){
+        return tryToGetUser(uuid);
+    }
+    public void updateUserRating(User user){
+        user.computeNewRating();
+        repository.save(user);
     }
 
     private User tryToGetUser(UUID uuid){

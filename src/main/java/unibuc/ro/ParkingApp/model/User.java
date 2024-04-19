@@ -1,23 +1,23 @@
 package unibuc.ro.ParkingApp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.extern.log4j.Log4j2;
 import unibuc.ro.ParkingApp.validator.UserEmailValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Entity
 @Table(name = "user")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+@Data
+@Log4j2
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,4 +33,14 @@ public class User {
     private List<Feedback> feedbackList = new ArrayList<>();
     private boolean isTrusted;
     private double rating;
+
+    public void computeNewRating() {
+        this.rating = feedbackList.stream()
+                    .map(Feedback::getRatingGiven)
+                    .mapToInt(i -> i)
+                    .average()
+                    .orElse(0);
+
+    }
+
 }
