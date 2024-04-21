@@ -30,6 +30,10 @@ public class UserService {
         return user;
 
     }
+    public String getProfilePicturePath(UUID id){
+        return tryToGetUser(id).getProfilePicturePath();
+    }
+
     public User getUserById(UUID uuid){
         return tryToGetUser(uuid);
     }

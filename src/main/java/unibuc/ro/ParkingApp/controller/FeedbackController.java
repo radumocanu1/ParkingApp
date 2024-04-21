@@ -24,7 +24,7 @@ public class FeedbackController {
     FeedbackService feedbackService;
 
     @PostMapping("/{id_of_user_to_receive_feedback}")
-    public ResponseEntity<Feedback> addFeedback(@Validated @RequestBody FeedbackRequest feedbackRequest, @PathVariable UUID id_of_user_to_receive_feedback) {
+    public ResponseEntity<Feedback> addFeedback( @Validated @RequestBody FeedbackRequest feedbackRequest, @PathVariable UUID id_of_user_to_receive_feedback) {
         return new ResponseEntity<>(feedbackService.addFeedback(feedbackRequest, id_of_user_to_receive_feedback), HttpStatus.CREATED);
     }
 

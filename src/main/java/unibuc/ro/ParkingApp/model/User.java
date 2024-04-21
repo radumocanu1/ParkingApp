@@ -33,14 +33,14 @@ public class User {
     private List<Feedback> feedbackList = new ArrayList<>();
     private boolean isTrusted;
     private double rating;
+    private String profilePicturePath;
 
     public void computeNewRating() {
         this.rating = feedbackList.stream()
-                    .map(Feedback::getRatingGiven)
-                    .mapToInt(i -> i)
-                    .average()
-                    .orElse(0);
+                .map(Feedback::getRatingGiven)
+                .mapToInt(i -> i)
+                .average()
+                .orElse(0);
 
     }
-
 }

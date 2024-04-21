@@ -16,5 +16,4 @@ public class FeedbackRequest {
     @NotNull(message = "You are required to provide a rating")
     private int ratingGiven;
     private boolean isAnonymous;
-
 }

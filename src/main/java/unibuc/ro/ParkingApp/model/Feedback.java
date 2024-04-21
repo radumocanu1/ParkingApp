@@ -23,5 +23,4 @@ public class Feedback {
     private String message;
     private int ratingGiven;
     private boolean isAnonymous;
-
 }

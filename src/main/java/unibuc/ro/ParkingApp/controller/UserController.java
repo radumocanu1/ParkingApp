@@ -33,5 +33,9 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserById(uuid), HttpStatus.OK);
 
     }
+    @GetMapping("/profilePic/{uuid}")
+    public ResponseEntity<String> getUserProfilePic(@PathVariable UUID uuid){
+        return new ResponseEntity<>(userService.getProfilePicturePath(uuid), HttpStatus.OK);
+    }
 
 }
