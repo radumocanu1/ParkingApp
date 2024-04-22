@@ -1,12 +1,17 @@
+version: '3.7'
+
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:22.0.5
     command:
       - start-dev
-    environment:
-      - KEYCLOAK_ADMIN=root
-      - KEYCLOAK_ADMIN_PASSWORD=root
     ports:
       - "8080:8080"
-    volumes:
-      - ./keycloak_data:/opt/jboss/keycloak/standalone/data
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=mysql
+      - DB_ADDR=127.0.0.1   # Adresa IP a instanței MySQL care rulează local
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=password
