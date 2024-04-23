@@ -25,14 +25,15 @@ public class SecurityConfig {
 
         httpSecurity.oauth2ResourceServer().jwt().jwtAuthenticationConverter(
                 jwt -> new JwtAuthenticationToken(jwt, authoritiesConverter.convert(jwt)));
-
-//        httpSecurity.authorizeHttpRequests(authorize -> authorize
-//                .requestMatchers("/user").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "admin")
-//                .requestMatchers("/admin").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "rest-api_admin")
-//                .anyRequest().permitAll()
-//        );
-        httpSecurity.csrf().disable();
-        httpSecurity.authorizeHttpRequests().anyRequest().permitAll();
+        httpSecurity
+                .cors().and()
+                .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/user").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "admin")
+                .requestMatchers("/admin").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "rest-api_admin")
+                .anyRequest().permitAll()
+        );
+//        httpSecurity.csrf().disable();
+//        httpSecurity.authorizeHttpRequests().anyRequest().permitAll();
 
         return httpSecurity.build();
     }
