@@ -1,8 +1,9 @@
-package unibuc.ro.ParkingApp.model;
+package unibuc.ro.ParkingApp.model.feedback;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import unibuc.ro.ParkingApp.model.user.User;
 
 import java.util.UUID;
 

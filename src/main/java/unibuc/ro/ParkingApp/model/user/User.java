@@ -1,16 +1,14 @@
-package unibuc.ro.ParkingApp.model;
+package unibuc.ro.ParkingApp.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.extern.log4j.Log4j2;
-import unibuc.ro.ParkingApp.validator.UserEmailValidator;
+import unibuc.ro.ParkingApp.model.feedback.Feedback;
+import unibuc.ro.ParkingApp.model.listing.Listing;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @Entity
 @Table(name = "user")
@@ -22,13 +20,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     UUID userUUID;
-    @NotBlank(message = "Username is required")
     String username;
-    @NotBlank(message = "Email is required")
-    @UserEmailValidator
     String email;
-    @NotBlank(message = "Password is required")
-    String password;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Listing> listings = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Feedback> feedbackList = new ArrayList<>();
     private boolean isTrusted;

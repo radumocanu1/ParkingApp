@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
+import unibuc.ro.ParkingApp.exception.ListingNotFound;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
 
 
@@ -28,6 +29,11 @@ public class CustomResponseEntityExceptionHandler {
     public ResponseEntity<String> handleUserNotFoundError(UserNotFound ex) {
         return new ResponseEntity<>(String.format(ApplicationConstants.USER_NOT_FOUND_TEMPLATE, ex.getMessage()), HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(ListingNotFound.class)
+    public ResponseEntity<String> handleListingNotFoundError(ListingNotFound ex) {
+        return new ResponseEntity<>(String.format(ApplicationConstants.LISTING_NOT_FOUND_TEMPLATE, ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
 
     private Map<String, List<String>> getErrorsMap(List<String> errors) {
         Map<String, List<String>> errorResponse = new HashMap<>();

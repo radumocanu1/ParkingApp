@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import unibuc.ro.ParkingApp.model.User;
+import unibuc.ro.ParkingApp.model.user.MinimalUser;
+import unibuc.ro.ParkingApp.model.user.User;
+import unibuc.ro.ParkingApp.model.user.UserRequest;
 import unibuc.ro.ParkingApp.service.UserService;
 
 import java.util.List;
@@ -20,13 +22,13 @@ public class UserController {
     UserService userService;
 
     @PostMapping()
-    public ResponseEntity<User> createUser(@Validated @RequestBody User user){
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.OK);
+    public ResponseEntity<User> createUser(@Validated @RequestBody UserRequest userRequest){
+        return new ResponseEntity<>(userService.createUser(userRequest), HttpStatus.OK);
 
     }
     @GetMapping()
     public ResponseEntity<List<User>> getAllUsers(){
-        return userService.getAllUsers();
+        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
     @GetMapping("/{uuid}")
     public ResponseEntity<User> getUser(@PathVariable UUID uuid){
@@ -34,8 +36,20 @@ public class UserController {
 
     }
     @GetMapping("/profilePic/{uuid}")
-    public ResponseEntity<String> getUserProfilePic(@PathVariable UUID uuid){
+    public ResponseEntity<MinimalUser> getUserProfilePic(@PathVariable UUID uuid){
         return new ResponseEntity<>(userService.getProfilePicturePath(uuid), HttpStatus.OK);
+    }
+    @PutMapping("/{uuid}")
+    public ResponseEntity<User> updateUser(@PathVariable UUID uuid, @Validated @RequestBody UserRequest userRequest){
+        return new ResponseEntity<>(userService.updateUser(userRequest, uuid), HttpStatus.OK);
+
+    }
+
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<Void> updateUser(@PathVariable UUID uuid){
+        userService.deleteUser(uuid);
+        return new ResponseEntity<>( HttpStatus.OK);
+
     }
 
 }

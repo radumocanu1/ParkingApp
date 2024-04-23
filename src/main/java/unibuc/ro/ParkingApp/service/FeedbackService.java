@@ -2,9 +2,9 @@ package unibuc.ro.ParkingApp.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import unibuc.ro.ParkingApp.model.Feedback;
-import unibuc.ro.ParkingApp.model.FeedbackRequest;
-import unibuc.ro.ParkingApp.model.User;
+import unibuc.ro.ParkingApp.model.feedback.Feedback;
+import unibuc.ro.ParkingApp.model.feedback.FeedbackRequest;
+import unibuc.ro.ParkingApp.model.user.User;
 import unibuc.ro.ParkingApp.repository.FeedbackRepository;
 import unibuc.ro.ParkingApp.service.mapper.FeedbackMapper;
 

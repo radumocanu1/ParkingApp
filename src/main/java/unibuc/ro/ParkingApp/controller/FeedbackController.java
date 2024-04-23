@@ -1,6 +1,5 @@
 package unibuc.ro.ParkingApp.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import unibuc.ro.ParkingApp.model.Feedback;
-import unibuc.ro.ParkingApp.model.FeedbackRequest;
+import unibuc.ro.ParkingApp.model.feedback.Feedback;
+import unibuc.ro.ParkingApp.model.feedback.FeedbackRequest;
 import unibuc.ro.ParkingApp.service.FeedbackService;
 
 import java.util.UUID;

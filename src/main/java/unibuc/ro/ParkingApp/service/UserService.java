@@ -1,37 +1,54 @@
 package unibuc.ro.ParkingApp.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
-import unibuc.ro.ParkingApp.model.Feedback;
-import unibuc.ro.ParkingApp.model.User;
+import unibuc.ro.ParkingApp.model.user.MinimalUser;
+import unibuc.ro.ParkingApp.model.user.User;
+import unibuc.ro.ParkingApp.model.user.UserRequest;
 import unibuc.ro.ParkingApp.repository.UserRepository;
+import unibuc.ro.ParkingApp.service.mapper.UserMapper;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@AllArgsConstructor
 @Service
 public class UserService {
 
-    @Autowired
     UserRepository repository;
+    UserMapper userMapper;
 
-    public ResponseEntity<List<User>> getAllUsers (){
+    public List<User> getAllUsers (){
         List<User> usersFromDB = repository.findAll();
-        return new ResponseEntity<>(usersFromDB.stream().toList(), HttpStatus.OK);
+        return usersFromDB.stream().toList();
 
     }
 
-    public User createUser(User user){
+    public User updateUser(UserRequest userRequest, UUID userUUID){
+        User existingUser = tryToGetUser(userUUID);
+        userMapper.fill(userRequest, existingUser);
+        repository.save(existingUser);
+        return existingUser;
+    }
+
+    public void deleteUser(UUID userUUID){
+        User user = tryToGetUser(userUUID);
+        repository.delete(user);
+    }
+
+    public User createUser(UserRequest userRequest){
+        User user = userMapper.userRequestToUser(userRequest);
         repository.save(user);
         return user;
 
     }
-    public String getProfilePicturePath(UUID id){
-        return tryToGetUser(id).getProfilePicturePath();
+    public MinimalUser getProfilePicturePath(UUID id){
+        User user = tryToGetUser(id);
+        return new MinimalUser(user.getUsername(), user.getProfilePicturePath());
     }
 
     public User getUserById(UUID uuid){

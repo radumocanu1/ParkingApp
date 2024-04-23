@@ -1,4 +1,4 @@
-package unibuc.ro.ParkingApp.model;
+package unibuc.ro.ParkingApp.model.feedback;
 
 
 import jakarta.validation.constraints.NotBlank;
