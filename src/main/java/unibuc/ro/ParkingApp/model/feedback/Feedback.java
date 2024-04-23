@@ -12,6 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@ToString
 public class Feedback {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

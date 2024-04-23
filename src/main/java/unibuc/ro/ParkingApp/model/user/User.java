@@ -1,5 +1,6 @@
 package unibuc.ro.ParkingApp.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.log4j.Log4j2;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Log4j2
+@ToString
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

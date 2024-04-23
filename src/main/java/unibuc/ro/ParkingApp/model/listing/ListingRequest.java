@@ -5,9 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import unibuc.ro.ParkingApp.model.picture.Picture;
 
 import java.util.Date;
-import java.util.UUID;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,7 +20,10 @@ public class ListingRequest {
     Date startDate;
     @NotNull
     Date endDate;
-    @NotNull(message = "User ID must be defined")
-    UUID userUUID;
+    private List<Picture> pictures;
+    String latitude;
+    String longitude;
+    int parkingSpotSlotNumber;
+    int price;
 
 }

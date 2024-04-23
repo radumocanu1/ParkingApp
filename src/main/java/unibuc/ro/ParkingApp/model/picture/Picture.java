@@ -1,4 +1,4 @@
-package unibuc.ro.ParkingApp.model;
+package unibuc.ro.ParkingApp.model.picture;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

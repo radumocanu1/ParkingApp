@@ -6,7 +6,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import unibuc.ro.ParkingApp.model.Picture;
+import lombok.ToString;
+import unibuc.ro.ParkingApp.model.picture.Picture;
 import unibuc.ro.ParkingApp.model.user.User;
 
 import java.time.LocalDateTime;
@@ -19,28 +20,29 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@ToString
 public class Listing {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     UUID listingUUID;
-    @JsonFormat(with = JsonFormat.Feature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,  shape = JsonFormat.Shape.STRING, pattern = "MM-dd HH:mm")
-    @OneToOne
-    Coordinates coordinates;
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "userUUID", nullable = false)
+    @JsonIgnore
     User user;
-    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
-    private  List<Picture> picturePaths;
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
+    private  List<Picture> pictures;
 
+    private String title;
+    String latitude;
+    String longitude;
     Date startDate;
     Date endDate;
     int parkingSpotSlotNumber;
     @JsonFormat(with = JsonFormat.Feature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,  shape = JsonFormat.Shape.STRING, pattern = "MM-dd HH:mm")
     LocalDateTime publishingDate;
-    private String title;
 
-    // this will always be the "perday" price
+
+    // this will always be the "per/day" price
     int price;
 
 
