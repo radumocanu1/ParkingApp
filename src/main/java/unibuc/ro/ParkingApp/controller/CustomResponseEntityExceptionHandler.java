@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
 import unibuc.ro.ParkingApp.exception.ListingNotFound;
+import unibuc.ro.ParkingApp.exception.OIDCUserNotFound;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
 
 
@@ -28,6 +29,10 @@ public class CustomResponseEntityExceptionHandler {
     @ExceptionHandler(UserNotFound.class)
     public ResponseEntity<String> handleUserNotFoundError(UserNotFound ex) {
         return new ResponseEntity<>(String.format(ApplicationConstants.USER_NOT_FOUND_TEMPLATE, ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(OIDCUserNotFound.class)
+    public ResponseEntity<String> handleOIDCUserNotFound(OIDCUserNotFound ex) {
+        return new ResponseEntity<>(String.format(ApplicationConstants.OIDC_USER_NOT_FOUND_TEMPLATE, ex.getMessage()), HttpStatus.NOT_FOUND);
     }
     @ExceptionHandler(ListingNotFound.class)
     public ResponseEntity<String> handleListingNotFoundError(ListingNotFound ex) {

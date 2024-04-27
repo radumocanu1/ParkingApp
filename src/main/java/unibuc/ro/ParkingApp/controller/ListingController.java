@@ -13,7 +13,7 @@ import unibuc.ro.ParkingApp.service.ListingService;
 import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/listing")
 public class ListingController {
     @Autowired

@@ -4,13 +4,16 @@ package unibuc.ro.ParkingApp.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import unibuc.ro.ParkingApp.model.user.MinimalUser;
+import unibuc.ro.ParkingApp.model.user.CreateUserRequest;
+import unibuc.ro.ParkingApp.model.user.UpdateUserRequest;
 import unibuc.ro.ParkingApp.model.user.User;
-import unibuc.ro.ParkingApp.model.user.UserRequest;
 import unibuc.ro.ParkingApp.service.UserService;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,8 +25,10 @@ public class UserController {
     UserService userService;
 
     @PostMapping()
-    public ResponseEntity<User> createUser(@Validated @RequestBody UserRequest userRequest){
-        return new ResponseEntity<>(userService.createUser(userRequest), HttpStatus.OK);
+    public ResponseEntity<User> createUser(Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        CreateUserRequest createUserRequest = new CreateUserRequest((String) token.getTokenAttributes().get("preferred_username"), (String) token.getTokenAttributes().get("email"));
+        return new ResponseEntity<>(userService.createUser((String) token.getTokenAttributes().get("sub"), createUserRequest), HttpStatus.OK);
 
     }
     @GetMapping()
@@ -39,17 +44,24 @@ public class UserController {
     public ResponseEntity<MinimalUser> getUserProfilePic(@PathVariable UUID uuid){
         return new ResponseEntity<>(userService.getProfilePicturePath(uuid), HttpStatus.OK);
     }
-    @PutMapping("/{uuid}")
-    public ResponseEntity<User> updateUser(@PathVariable UUID uuid, @Validated @RequestBody UserRequest userRequest){
-        return new ResponseEntity<>(userService.updateUser(userRequest, uuid), HttpStatus.OK);
+    @PutMapping()
+    public ResponseEntity<User> updateUser(@Validated @RequestBody UpdateUserRequest updateUserRequest, Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(userService.updateUser((String) token.getTokenAttributes().get("sub"), updateUserRequest), HttpStatus.OK);
 
     }
 
-    @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> updateUser(@PathVariable UUID uuid){
-        userService.deleteUser(uuid);
-        return new ResponseEntity<>( HttpStatus.OK);
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteUser(Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        userService.deleteUser((String) token.getTokenAttributes().get("sub"));
+        return new ResponseEntity<>( HttpStatus.NO_CONTENT);
 
+    }
+    @GetMapping("/profile")
+    public ResponseEntity<User> getUserProfile(Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(userService.getUserProfile((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
     }
 
 }

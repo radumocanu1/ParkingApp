@@ -5,8 +5,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.listing.ListingRequest;
-import unibuc.ro.ParkingApp.model.user.User;
-import unibuc.ro.ParkingApp.model.user.UserRequest;
 
 @Mapper(componentModel = "spring")
 

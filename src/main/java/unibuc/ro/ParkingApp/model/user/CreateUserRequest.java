@@ -8,11 +8,11 @@ import unibuc.ro.ParkingApp.validator.UserEmailValidator;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRequest {
+public class CreateUserRequest {
     @NotBlank(message = "Username is required")
     String username;
     @NotBlank(message = "Email is required")
     @UserEmailValidator
     String email;
-    private String profilePicturePath;
+
 }

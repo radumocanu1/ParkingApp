@@ -1,4 +1,4 @@
-package unibuc.ro.ParkingApp.configuration;
+package unibuc.ro.ParkingApp.configuration.OIDC.Keycloak;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;

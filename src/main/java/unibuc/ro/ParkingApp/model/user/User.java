@@ -30,6 +30,12 @@ public class User {
     private boolean isTrusted;
     private double rating;
     private String profilePicturePath;
+    private String phoneNumber;
+    private String firstName;
+    private String lastName;
+    private int age;
+
+
 
     public void computeNewRating() {
         this.rating = feedbackList.stream()

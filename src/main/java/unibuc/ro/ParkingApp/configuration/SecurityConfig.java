@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.server.resource.authentication.Delega
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import unibuc.ro.ParkingApp.configuration.OIDC.Keycloak.KeycloakJwtRolesConverter;
 
 
 @Configuration
@@ -28,9 +29,11 @@ public class SecurityConfig {
         httpSecurity
                 .cors().and()
                 .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/user").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "admin")
+//                .requestMatchers("/user").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "admin")
+                .requestMatchers("/user/**").authenticated()
                 .requestMatchers("/admin").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "rest-api_admin")
                 .anyRequest().permitAll()
+
         );
 //        httpSecurity.csrf().disable();
 //        httpSecurity.authorizeHttpRequests().anyRequest().permitAll();
