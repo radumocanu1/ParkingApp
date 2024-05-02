@@ -2,11 +2,13 @@ package unibuc.ro.ParkingApp.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.model.user.MinimalUser;
 import unibuc.ro.ParkingApp.model.user.CreateUserRequest;
 import unibuc.ro.ParkingApp.model.user.UpdateUserRequest;
@@ -62,6 +64,11 @@ public class UserController {
     public ResponseEntity<User> getUserProfile(Principal principal){
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
         return new ResponseEntity<>(userService.getUserProfile((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+    }
+    @PostMapping("/profilePic")
+    public ResponseEntity<Resource> updateUserProfilePic(Principal principal, @RequestParam("file")  MultipartFile multipartFile){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(userService.changeProfilePicture((String) token.getTokenAttributes().get("sub"), multipartFile), HttpStatus.OK);
     }
 
 }

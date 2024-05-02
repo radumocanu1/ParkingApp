@@ -3,6 +3,7 @@ package unibuc.ro.ParkingApp.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.OIDC.Keycloak.KeycloakAdminService;
 import unibuc.ro.ParkingApp.exception.OIDCUserNotFound;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
@@ -10,6 +11,8 @@ import unibuc.ro.ParkingApp.model.user.*;
 import unibuc.ro.ParkingApp.repository.OIDCUserMappingRepository;
 import unibuc.ro.ParkingApp.repository.UserRepository;
 import unibuc.ro.ParkingApp.service.mapper.UserMapper;
+import org.springframework.core.io.Resource;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +26,7 @@ public class UserService {
     OIDCUserMappingRepository oidcUserMappingRepository;
     UserMapper userMapper;
     KeycloakAdminService keycloakAdminService;
+    FileService fileService;
 
     public List<User> getAllUsers (){
         List<User> usersFromDB = repository.findAll();
@@ -58,7 +62,7 @@ public class UserService {
     }
     public MinimalUser getProfilePicturePath(UUID id){
         User user = tryToGetUser(id);
-        return new MinimalUser(user.getUsername(), user.getProfilePicturePath());
+        return new MinimalUser(user.getUsername(), null);
     }
 
     public User getUserById(UUID uuid){
@@ -72,6 +76,13 @@ public class UserService {
     public void updateUserRating(User user){
         user.computeNewRating();
         repository.save(user);
+    }
+    public Resource changeProfilePicture(String tokenSubClaim, MultipartFile profilePicture){
+        log.info("Changing profile picture ...");
+        OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
+        fileService.save(profilePicture, tokenSubClaim);
+        oidcUserMapping.getUser().setHasProfilePicture(true);
+        return fileService.load(tokenSubClaim);
     }
 
     private User tryToGetUser(UUID uuid){
@@ -90,5 +101,6 @@ public class UserService {
         }
         return oidcUserMapping.get();
     }
+
 
 }

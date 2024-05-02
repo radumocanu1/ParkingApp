@@ -29,7 +29,7 @@ public class User {
     private List<Feedback> feedbackList = new ArrayList<>();
     private boolean isTrusted;
     private double rating;
-    private String profilePicturePath;
+    private boolean hasProfilePicture;
     private String phoneNumber;
     private String firstName;
     private String lastName;
