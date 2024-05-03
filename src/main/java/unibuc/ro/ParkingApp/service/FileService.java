@@ -6,47 +6,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.stream.Stream;
 
 @Service
 public class FileService {
     private final Path root = Paths.get("profilePictures");
 
-    public void save(MultipartFile file, String tokenSubClaim) {
+    public byte[] extractFileBytes(MultipartFile file) {
         try {
-            String originalExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-            try (Stream<Path> files = Files.walk(root)) {
-                files.forEach(filePath -> {
-                    String currentFileName = filePath.getFileName().toString();
-                    String currentExtension = StringUtils.getFilenameExtension(currentFileName);
-                    String currentFileToken = StringUtils.stripFilenameExtension(currentFileName);
-                    if (currentFileToken.equals(tokenSubClaim)) {
-                        assert originalExtension != null;
-                        if (!originalExtension.equals(currentExtension)) {
-                            try {
-                                Files.delete(filePath);
-                            } catch (IOException e) {
-                                throw new RuntimeException("Error deleting existing file: " + e.getMessage(), e);
-                            }
-                        }
-                    }
-                });
-            }
-            String fileNameWithExtension = tokenSubClaim + "." + originalExtension;
-            Files.copy(file.getInputStream(), this.root.resolve(fileNameWithExtension), StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            throw new RuntimeException("Error saving file: " + e.getMessage(), e);
+            return file.getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
-    public Resource load(String tokenSubClaim) {
+    public byte[] loadProfilePicture(String tokenSubClaim) {
         try {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, tokenSubClaim + "*")) {
                 for (Path file : stream) {
                     if (Files.isRegularFile(file) && Files.isReadable(file)) {
-                        return new UrlResource(file.toUri());
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        Files.copy(file, outputStream);
+                        return outputStream.toByteArray();
                     }
                 }
             }

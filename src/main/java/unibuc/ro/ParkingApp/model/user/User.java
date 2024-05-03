@@ -29,7 +29,9 @@ public class User {
     private List<Feedback> feedbackList = new ArrayList<>();
     private boolean isTrusted;
     private double rating;
-    private boolean hasProfilePicture;
+    private boolean hasProfilePicture ;
+    @Column(name = "profile_picture_bytes", columnDefinition = "LONGBLOB")
+    private byte[] profilePictureBytes;
     private String phoneNumber;
     private String firstName;
     private String lastName;

@@ -77,12 +77,13 @@ public class UserService {
         user.computeNewRating();
         repository.save(user);
     }
-    public Resource changeProfilePicture(String tokenSubClaim, MultipartFile profilePicture){
+    public void changeProfilePicture(String tokenSubClaim, MultipartFile profilePicture){
         log.info("Changing profile picture ...");
         OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
-        fileService.save(profilePicture, tokenSubClaim);
-        oidcUserMapping.getUser().setHasProfilePicture(true);
-        return fileService.load(tokenSubClaim);
+        User user = oidcUserMapping.getUser();
+        user.setProfilePictureBytes(fileService.extractFileBytes(profilePicture));
+        user.setHasProfilePicture(true);
+        repository.save(user);
     }
 
     private User tryToGetUser(UUID uuid){
