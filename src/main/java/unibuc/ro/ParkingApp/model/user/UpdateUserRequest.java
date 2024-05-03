@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 public class UpdateUserRequest {
     String username;
     String email;
-    private String profilePicturePath;
     private String phoneNumber;
     private String firstName;
     private String LastName;
