@@ -69,6 +69,7 @@ public class UserService {
         return tryToGetUser(uuid);
     }
     public User getUserProfile(String tokenSubClaim){
+
         log.info("Getting user profile ...");
         OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
         return oidcUserMapping.getUser();

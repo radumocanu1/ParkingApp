@@ -36,6 +36,7 @@ public class User {
     private String phoneNumber;
     private String firstName;
     private String lastName;
+    private String sex;
     private int age;
 
 

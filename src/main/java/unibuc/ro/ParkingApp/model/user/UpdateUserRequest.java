@@ -15,4 +15,5 @@ public class UpdateUserRequest {
     private String firstName;
     private String LastName;
     private int age;
+    private String sex;
 }
