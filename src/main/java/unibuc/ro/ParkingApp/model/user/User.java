@@ -7,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import unibuc.ro.ParkingApp.model.feedback.Feedback;
 import unibuc.ro.ParkingApp.model.listing.Listing;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,11 +41,14 @@ public class User {
 
 
     public void computeNewRating() {
-        this.rating = feedbackList.stream()
-                .map(Feedback::getRatingGiven)
-                .mapToInt(i -> i)
+        double averageRating = feedbackList.stream()
+                .mapToInt(Feedback::getRatingGiven)
                 .average()
                 .orElse(0);
+        DecimalFormat df = new DecimalFormat("#0.00");
+        String formattedRating = df.format(averageRating);
+
+        this.rating = Double.parseDouble(formattedRating);
 
     }
 }
