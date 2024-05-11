@@ -2,6 +2,7 @@ package unibuc.ro.ParkingApp.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.OIDC.Keycloak.KeycloakAdminService;
@@ -40,7 +41,8 @@ public class UserService {
         User existingUser = oidcUserMapping.getUser();
         userMapper.fill(updateUserRequest, existingUser);
         repository.save(existingUser);
-        keycloakAdminService.updateUser(tokenSubClaim, existingUser.getUsername(), existingUser.getEmail());
+        // TODO decide whether keycloak admin should be used when updating users ( should keycloak values be different?)
+//        keycloakAdminService.updateUser(tokenSubClaim, existingUser.getUsername(), existingUser.getEmail());
         log.info("User successfully updated!");
         return existingUser;
     }
@@ -53,10 +55,11 @@ public class UserService {
 
     }
 
-    public User createUser(String tokenSubClaim, CreateUserRequest createUserRequest){
+    public User createUser( JwtAuthenticationToken token){
+        CreateUserRequest createUserRequest = new CreateUserRequest((String) token.getTokenAttributes().get("name"), (String) token.getTokenAttributes().get("email"));
         User user = userMapper.userRequestToUser(createUserRequest);
         repository.save(user);
-        oidcUserMappingRepository.save(new OIDCUserMapping(tokenSubClaim, user));
+        oidcUserMappingRepository.save(new OIDCUserMapping((String) token.getTokenAttributes().get("sub"), user));
         return user;
 
     }
