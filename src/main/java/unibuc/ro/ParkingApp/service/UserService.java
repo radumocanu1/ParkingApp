@@ -89,9 +89,10 @@ public class UserService {
         User user = oidcUserMapping.getUser();
         user.setProfilePictureBytes(fileService.extractFileBytes(profilePicture));
         user.setHasProfilePicture(true);
+        repository.save(user);
+
         log.info("Profile picture was successfully set!");
 
-        repository.save(user);
     }
 
     private User tryToGetUser(UUID uuid){
