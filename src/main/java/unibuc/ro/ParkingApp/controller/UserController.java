@@ -2,7 +2,6 @@ package unibuc.ro.ParkingApp.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -10,8 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
-import unibuc.ro.ParkingApp.model.user.MinimalUser;
-import unibuc.ro.ParkingApp.model.user.CreateUserRequest;
 import unibuc.ro.ParkingApp.model.user.UpdateUserRequest;
 import unibuc.ro.ParkingApp.model.user.User;
 import unibuc.ro.ParkingApp.service.UserService;
@@ -41,10 +38,6 @@ public class UserController {
     public ResponseEntity<User> getUser(@PathVariable UUID uuid){
         return new ResponseEntity<>(userService.getUserById(uuid), HttpStatus.OK);
 
-    }
-    @GetMapping("/profilePic/{uuid}")
-    public ResponseEntity<MinimalUser> getUserProfilePic(@PathVariable UUID uuid){
-        return new ResponseEntity<>(userService.getProfilePicturePath(uuid), HttpStatus.OK);
     }
     @PutMapping()
     public ResponseEntity<User> updateUser(@Validated @RequestBody UpdateUserRequest updateUserRequest, Principal principal){

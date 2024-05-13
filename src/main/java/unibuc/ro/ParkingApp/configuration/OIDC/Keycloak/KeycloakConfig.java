@@ -13,9 +13,9 @@ public class KeycloakConfig {
     String keycloakUrl;
     @Value("${clientID}")
     String clientID;
+
     @Bean
     Keycloak keycloak() {
-        System.out.println(keycloakUrl);
         return KeycloakBuilder.builder()
                 .serverUrl(keycloakUrl)
                 .realm("master")

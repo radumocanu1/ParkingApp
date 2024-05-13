@@ -36,7 +36,7 @@ public class UserService {
     }
 
     public User updateUser(String tokenSubClaim, UpdateUserRequest updateUserRequest){
-        log.info("Updating user...");
+        log.info("Updating user... " + tokenSubClaim);
         OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
         User existingUser = oidcUserMapping.getUser();
         userMapper.fill(updateUserRequest, existingUser);
@@ -48,24 +48,25 @@ public class UserService {
     }
 
     public void deleteUser(String tokenSubClaim){
+        log.info("Deleting user... " + tokenSubClaim);
         OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
         keycloakAdminService.deleteUser(tokenSubClaim);
         oidcUserMappingRepository.delete(oidcUserMapping);
         repository.delete(oidcUserMapping.getUser());
+        log.info("User successfully deleted");
 
     }
 
     public User createUser( JwtAuthenticationToken token){
+        log.info("Creating user...");
         CreateUserRequest createUserRequest = new CreateUserRequest((String) token.getTokenAttributes().get("name"), (String) token.getTokenAttributes().get("email"));
         User user = userMapper.userRequestToUser(createUserRequest);
         repository.save(user);
         oidcUserMappingRepository.save(new OIDCUserMapping((String) token.getTokenAttributes().get("sub"), user));
+        log.info("User was created!" );
+
         return user;
 
-    }
-    public MinimalUser getProfilePicturePath(UUID id){
-        User user = tryToGetUser(id);
-        return new MinimalUser(user.getUsername(), null);
     }
 
     public User getUserById(UUID uuid){
@@ -73,8 +74,9 @@ public class UserService {
     }
     public User getUserProfile(String tokenSubClaim){
 
-        log.info("Getting user profile ...");
+        log.info("Getting user profile ... sub claim -> " + tokenSubClaim);
         OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
+        log.info("User profile was successfully fetched!");
         return oidcUserMapping.getUser();
     }
     public void updateUserRating(User user){
@@ -82,17 +84,20 @@ public class UserService {
         repository.save(user);
     }
     public void changeProfilePicture(String tokenSubClaim, MultipartFile profilePicture){
-        log.info("Changing profile picture ...");
+        log.info("Changing profile picture... sub claim -> " + tokenSubClaim);
         OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
         User user = oidcUserMapping.getUser();
         user.setProfilePictureBytes(fileService.extractFileBytes(profilePicture));
         user.setHasProfilePicture(true);
+        log.info("Profile picture was successfully set!");
+
         repository.save(user);
     }
 
     private User tryToGetUser(UUID uuid){
         Optional<User> userFromDB = repository.findById(uuid);
         if (userFromDB.isEmpty()){
+            log.warning("User with internal id " + uuid + " was not found in DB");
             throw new UserNotFound(uuid.toString());
         }
         return userFromDB.get();

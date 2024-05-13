@@ -24,19 +24,19 @@ public class SecurityConfig {
                         new JwtGrantedAuthoritiesConverter(),
                         new KeycloakJwtRolesConverter());
 
-        httpSecurity.oauth2ResourceServer().jwt().jwtAuthenticationConverter(
-                jwt -> new JwtAuthenticationToken(jwt, authoritiesConverter.convert(jwt)));
-        httpSecurity
-                .cors().and()
-                .authorizeHttpRequests(authorize -> authorize
-//                .requestMatchers("/user").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "admin")
-                .requestMatchers("/user/**").authenticated()
-                .requestMatchers("/admin").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "rest-api_admin")
-                .anyRequest().permitAll()
-
-        );
-//        httpSecurity.csrf().disable();
-//        httpSecurity.authorizeHttpRequests().anyRequest().permitAll();
+//        httpSecurity.oauth2ResourceServer().jwt().jwtAuthenticationConverter(
+//                jwt -> new JwtAuthenticationToken(jwt, authoritiesConverter.convert(jwt)));
+//        httpSecurity
+//                .cors().and()
+//                .authorizeHttpRequests(authorize -> authorize
+////                .requestMatchers("/user").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "admin")
+//                .requestMatchers("/user/**").authenticated()
+//                .requestMatchers("/admin").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "rest-api_admin")
+//                .anyRequest().permitAll()
+//
+//        );
+        httpSecurity.csrf().disable();
+        httpSecurity.authorizeHttpRequests().anyRequest().permitAll();
 
         return httpSecurity.build();
     }
