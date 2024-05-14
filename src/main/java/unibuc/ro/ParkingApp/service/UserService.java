@@ -9,10 +9,8 @@ import unibuc.ro.ParkingApp.configuration.OIDC.Keycloak.KeycloakAdminService;
 import unibuc.ro.ParkingApp.exception.OIDCUserNotFound;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
 import unibuc.ro.ParkingApp.model.user.*;
-import unibuc.ro.ParkingApp.repository.OIDCUserMappingRepository;
 import unibuc.ro.ParkingApp.repository.UserRepository;
 import unibuc.ro.ParkingApp.service.mapper.UserMapper;
-import org.springframework.core.io.Resource;
 
 
 import java.util.List;
@@ -24,10 +22,10 @@ import java.util.UUID;
 @Log
 public class UserService {
     UserRepository repository;
-    OIDCUserMappingRepository oidcUserMappingRepository;
     UserMapper userMapper;
     KeycloakAdminService keycloakAdminService;
     FileService fileService;
+    OIDCUserMappingService oidcUserMappingService;
 
     public List<User> getAllUsers (){
         List<User> usersFromDB = repository.findAll();
@@ -37,7 +35,7 @@ public class UserService {
 
     public User updateUser(String tokenSubClaim, UpdateUserRequest updateUserRequest){
         log.info("Updating user... " + tokenSubClaim);
-        OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
+        OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
         User existingUser = oidcUserMapping.getUser();
         userMapper.fill(updateUserRequest, existingUser);
         repository.save(existingUser);
@@ -49,21 +47,22 @@ public class UserService {
 
     public void deleteUser(String tokenSubClaim){
         log.info("Deleting user... " + tokenSubClaim);
-        OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
+        OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
         keycloakAdminService.deleteUser(tokenSubClaim);
-        oidcUserMappingRepository.delete(oidcUserMapping);
+        oidcUserMappingService.delete(oidcUserMapping);
         repository.delete(oidcUserMapping.getUser());
         log.info("User successfully deleted");
 
     }
 
-    public User createUser( JwtAuthenticationToken token){
+    public User createUser(String tokenSubClaim, String tokenNameClaim, String tokenEmail){
         log.info("Creating user...");
-        CreateUserRequest createUserRequest = new CreateUserRequest((String) token.getTokenAttributes().get("name"), (String) token.getTokenAttributes().get("email"));
+        CreateUserRequest createUserRequest = new CreateUserRequest(tokenNameClaim, tokenEmail);
         User user = userMapper.userRequestToUser(createUserRequest);
         repository.save(user);
-        oidcUserMappingRepository.save(new OIDCUserMapping((String) token.getTokenAttributes().get("sub"), user));
-        log.info("User was created!" );
+        OIDCUserMapping oidcUserMapping = oidcUserMappingService.create(tokenSubClaim, user);
+        log.info("User successfully created!");
+        log.info("Created mapping from OIDC sub " + oidcUserMapping.getOIDCUserUUID() + "to user id "+ oidcUserMapping.getUser().getUserUUID());
 
         return user;
 
@@ -75,7 +74,7 @@ public class UserService {
     public User getUserProfile(String tokenSubClaim){
 
         log.info("Getting user profile ... sub claim -> " + tokenSubClaim);
-        OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
+        OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
         log.info("User profile was successfully fetched!");
         return oidcUserMapping.getUser();
     }
@@ -85,7 +84,7 @@ public class UserService {
     }
     public void changeProfilePicture(String tokenSubClaim, MultipartFile profilePicture){
         log.info("Changing profile picture... sub claim -> " + tokenSubClaim);
-        OIDCUserMapping oidcUserMapping = tryToGetOIDCUserMapping(tokenSubClaim);
+        OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
         User user = oidcUserMapping.getUser();
         user.setProfilePictureBytes(fileService.extractFileBytes(profilePicture));
         user.setHasProfilePicture(true);
@@ -102,15 +101,6 @@ public class UserService {
             throw new UserNotFound(uuid.toString());
         }
         return userFromDB.get();
-    }
-    private OIDCUserMapping tryToGetOIDCUserMapping(String tokenSubClaim){
-        Optional<OIDCUserMapping> oidcUserMapping = oidcUserMappingRepository.findById(tokenSubClaim);
-        if (oidcUserMapping.isEmpty())
-        {
-            log.warning("Cannot map OIDC user with sub claim " + tokenSubClaim + " against any existing user. Consider creating the mapping and try again.");
-            throw new OIDCUserNotFound(tokenSubClaim);
-        }
-        return oidcUserMapping.get();
     }
 
 

@@ -27,7 +27,7 @@ public class UserController {
     @PostMapping()
     public ResponseEntity<User> createUser(Principal principal){
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
-        return new ResponseEntity<>(userService.createUser(token), HttpStatus.OK);
+        return new ResponseEntity<>(userService.createUser((String) token.getTokenAttributes().get("sub"), (String) token.getTokenAttributes().get("name"), (String) token.getTokenAttributes().get("email")), HttpStatus.OK);
 
     }
     @GetMapping()

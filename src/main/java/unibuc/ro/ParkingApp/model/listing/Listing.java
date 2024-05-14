@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import unibuc.ro.ParkingApp.model.picture.Picture;
 import unibuc.ro.ParkingApp.model.user.User;
 
 import java.time.LocalDateTime;
@@ -29,9 +28,7 @@ public class Listing {
     @JoinColumn(name = "userUUID", nullable = false)
     @JsonIgnore
     User user;
-    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
-    private  List<Picture> pictures;
-
+    private byte[] mainPicture;
     private String title;
     String latitude;
     String longitude;
@@ -40,7 +37,10 @@ public class Listing {
     int parkingSpotSlotNumber;
     @JsonFormat(with = JsonFormat.Feature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,  shape = JsonFormat.Shape.STRING, pattern = "MM-dd HH:mm")
     LocalDateTime publishingDate;
-
+    @ElementCollection(targetClass = Byte[].class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "pictures", joinColumns = @JoinColumn(name = "listingUUID"))
+    @Column(name = "picture", nullable = false)
+    private List<byte[]> pictures;
 
     // this will always be the "per/day" price
     int price;
