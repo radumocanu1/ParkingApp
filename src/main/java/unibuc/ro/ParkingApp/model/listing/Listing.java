@@ -42,6 +42,10 @@ public class Listing {
     @CollectionTable(name = "pictures", joinColumns = @JoinColumn(name = "listingUUID"))
     @Column(name = "picture", nullable = false)
     private List<String> pictures;
+    // enable optimistic locking
+    // todo add this to documentation (possibility of optimistic locking)
+//    @Version
+//    private Long version;
 
     // this will always be the "per/day" price
     int price;

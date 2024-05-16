@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.exception.ListingNotFound;
 import unibuc.ro.ParkingApp.model.listing.Listing;
@@ -59,7 +61,7 @@ public class ListingService {
         repository.save(listing);
         return listing;
     }
-    public void addPhotoToListing(UUID listingUUID, MultipartFile file, PictureType pictureType){
+    public synchronized void addPhotoToListing(UUID listingUUID, MultipartFile file, PictureType pictureType){
         log.info("Adding " + file.getOriginalFilename() + " to listing "  + listingUUID + " ..." );
         Listing listing = getListing(listingUUID);
         listing.addPicture(fileService.saveFile(listingUUID,file), pictureType);
