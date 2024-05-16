@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.exception.ListingNotFound;
 import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.listing.ListingRequest;
+import unibuc.ro.ParkingApp.model.PictureType;
+import unibuc.ro.ParkingApp.model.listing.ListingResponse;
 import unibuc.ro.ParkingApp.model.user.User;
 import unibuc.ro.ParkingApp.repository.ListingRepository;
 import unibuc.ro.ParkingApp.service.mapper.ListingMapper;
@@ -33,6 +35,13 @@ public class ListingService {
         List<Listing> listingsFromDB = repository.findAll();
         return listingsFromDB.stream().toList();
     }
+    public ListingResponse getListingResponse(UUID listingId){
+        Listing listing = getListing(listingId);
+        ListingResponse listingResponse = listingMapper.listingToListingResponse(listing);
+//        listingResponse.setMainPicture(fileService.loadPicture(listing.getMainPicture()));
+        addPicturesToListingResponse(listingResponse,listing.getPictures());
+        return listingResponse;
+    }
     public Listing createListing(ListingRequest listingRequest, String tokenSubClaim){
         log.info("createListing");
         Listing listing = listingMapper.listingRequestToListing(listingRequest);
@@ -44,18 +53,23 @@ public class ListingService {
         return listing;
     }
     public Listing updateListing(ListingRequest listingRequest, UUID listingUUID){
-        Listing listing = tryToGetListing(listingUUID);
+        Listing listing = getListing(listingUUID);
         listingMapper.fill(listingRequest,listing);
         // pictures should be deleted at this step
         repository.save(listing);
         return listing;
     }
+    public void addPhotoToListing(UUID listingUUID, MultipartFile file, PictureType pictureType){
+        log.info("Adding " + file.getOriginalFilename() + " to listing "  + listingUUID + " ..." );
+        Listing listing = getListing(listingUUID);
+        listing.addPicture(fileService.saveFile(listingUUID,file), pictureType);
+        repository.save(listing);
+        log.info("Photo successfully added!" );
 
-
-    public Listing getListing(UUID listingUUID){
-        return tryToGetListing(listingUUID);
     }
-    private Listing tryToGetListing(UUID uuid){
+
+
+    public Listing getListing(UUID uuid){
         Optional<Listing> listingsFromDB = repository.findById(uuid);
         if (listingsFromDB.isEmpty()){
             throw new ListingNotFound(uuid.toString());
@@ -68,6 +82,12 @@ public class ListingService {
             picturesBytesList.add(fileService.extractFileBytes(multipartFile));
         }
         return picturesBytesList;
+    }
+
+    private void addPicturesToListingResponse(ListingResponse listingResponse, List<String> pictures){
+        for (String picture : pictures){
+            listingResponse.addPicture(fileService.loadPicture(picture));
+        }
     }
 
 

@@ -1,19 +1,20 @@
 package unibuc.ro.ParkingApp.service;
 
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.UUID;
 
 @Service
 public class FileService {
-    private final Path root = Paths.get("profilePictures");
+    private static final String ROOT_DIRECTORY = "listingPicture";
+
+    private final Path root = Paths.get(ROOT_DIRECTORY);
 
     public byte[] extractFileBytes(MultipartFile file) {
         try {
@@ -22,20 +23,33 @@ public class FileService {
             throw new RuntimeException(e);
         }
     }
-    public byte[] loadProfilePicture(String tokenSubClaim) {
-        try {
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, tokenSubClaim + "*")) {
-                for (Path file : stream) {
-                    if (Files.isRegularFile(file) && Files.isReadable(file)) {
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                        Files.copy(file, outputStream);
-                        return outputStream.toByteArray();
-                    }
-                }
-            }
-            throw new FileNotFoundException("Could not find or read the file with tokenSubClaim: " + tokenSubClaim);
-        } catch (IOException e) {
-            throw new RuntimeException("Error loading file: " + e.getMessage(), e);
+
+    // todo handle this with ResponseEntityExceptionHandler
+    @SneakyThrows
+    public String saveFile(UUID listingUUID, MultipartFile file) {
+        Path directoryPath = Paths.get(ROOT_DIRECTORY, listingUUID.toString());
+        if (!Files.exists(directoryPath)) {
+            Files.createDirectories(directoryPath);
         }
+
+        String fileExtension = getFileExtension(file.getOriginalFilename());
+        String newFileName = UUID.randomUUID() + fileExtension;
+        Path filePath = directoryPath.resolve(newFileName);
+        Files.copy(file.getInputStream(), filePath);
+        return filePath.toString();
+    }
+
+    private String getFileExtension(String fileName) {
+        if (fileName == null || fileName.lastIndexOf('.') == -1) {
+            return "";
+        }
+        return fileName.substring(fileName.lastIndexOf('.'));
+    }
+    // todo same as above
+
+    @SneakyThrows
+    public byte[] loadPicture(String picturePath)  {
+        Path filePath = Paths.get(picturePath);
+        return Files.readAllBytes(filePath);
     }
 }
