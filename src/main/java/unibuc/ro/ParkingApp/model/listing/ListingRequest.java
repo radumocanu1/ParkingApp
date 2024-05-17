@@ -28,4 +28,6 @@ public class ListingRequest {
     String longitude;
     int parkingSpotSlotNumber;
     int price;
+    int sector;
+    String location;
 }

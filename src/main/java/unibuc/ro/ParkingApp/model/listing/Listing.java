@@ -36,6 +36,8 @@ public class Listing {
     Date startDate;
     Date endDate;
     int parkingSpotSlotNumber;
+    int sector;
+    String location;
     @JsonFormat(with = JsonFormat.Feature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,  shape = JsonFormat.Shape.STRING, pattern = "MM-dd HH:mm")
     LocalDateTime publishingDate;
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)

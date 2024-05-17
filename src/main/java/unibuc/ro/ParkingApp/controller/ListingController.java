@@ -33,6 +33,12 @@ public class ListingController {
     public ResponseEntity<List<Listing>> getAllListings(){
         return new ResponseEntity<>(listingService.getAllListings(), HttpStatus.OK);
     }
+    // only for current test
+    @GetMapping("/test")
+    public ResponseEntity<List<ListingResponse>> getAllListingsResponses(){
+        return new ResponseEntity<>(listingService.getAllListingsResponses(), HttpStatus.OK);
+    }
+
     @GetMapping("/{listingUUID}")
     public ResponseEntity<ListingResponse> getListing(@PathVariable UUID listingUUID){
         return new ResponseEntity<>(listingService.getListingResponse(listingUUID), HttpStatus.OK);
@@ -51,5 +57,6 @@ public class ListingController {
         listingService.addPhotoToListing(listingUUID, file, PictureType.MAIN_PICTURE);
         return new ResponseEntity<>(String.format(ApplicationConstants.LISTING_PHOTO_ADDED, listingUUID), HttpStatus.OK);
     }
+
 
 }

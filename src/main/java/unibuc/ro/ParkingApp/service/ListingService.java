@@ -12,6 +12,7 @@ import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.listing.ListingRequest;
 import unibuc.ro.ParkingApp.model.PictureType;
 import unibuc.ro.ParkingApp.model.listing.ListingResponse;
+import unibuc.ro.ParkingApp.model.listing.MinimalListing;
 import unibuc.ro.ParkingApp.model.user.User;
 import unibuc.ro.ParkingApp.repository.ListingRepository;
 import unibuc.ro.ParkingApp.service.mapper.ListingMapper;
@@ -37,10 +38,21 @@ public class ListingService {
         List<Listing> listingsFromDB = repository.findAll();
         return listingsFromDB.stream().toList();
     }
+    public List<ListingResponse> getAllListingsResponses(){
+        List<Listing> listingsFromDB = repository.findAll();
+        List<ListingResponse> listingResponses = new ArrayList<>();
+        for (Listing listing : listingsFromDB) {
+            listingResponses.add(getListingResponse(listing.getListingUUID()));
+        }
+        return listingResponses;
+    }
+//    public List<MinimalListing> getAllMinimalListings(){
+//
+//    }
     public ListingResponse getListingResponse(UUID listingId){
         Listing listing = getListing(listingId);
         ListingResponse listingResponse = listingMapper.listingToListingResponse(listing);
-//        listingResponse.setMainPicture(fileService.loadPicture(listing.getMainPicture()));
+        listingResponse.setMainPicture(fileService.loadPicture(listing.getMainPicture()));
         addPicturesToListingResponse(listingResponse,listing.getPictures());
         return listingResponse;
     }
@@ -77,13 +89,6 @@ public class ListingService {
             throw new ListingNotFound(uuid.toString());
         }
         return listingsFromDB.get();
-    }
-    private List<byte[]> extractBytesFromListingPictures(List<MultipartFile> multipartFiles){
-        List<byte[]> picturesBytesList = new ArrayList<>();
-        for (MultipartFile multipartFile : multipartFiles){
-            picturesBytesList.add(fileService.extractFileBytes(multipartFile));
-        }
-        return picturesBytesList;
     }
 
     private void addPicturesToListingResponse(ListingResponse listingResponse, List<String> pictures){

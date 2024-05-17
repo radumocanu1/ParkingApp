@@ -29,6 +29,8 @@ public class ListingResponse {
     @JsonFormat(with = JsonFormat.Feature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,  shape = JsonFormat.Shape.STRING, pattern = "MM-dd HH:mm")
     LocalDateTime publishingDate;
     int price;
+    int sector;
+    String location;
 
     public void addPicture(byte[] picture) {
         this.pictures.add(picture);
