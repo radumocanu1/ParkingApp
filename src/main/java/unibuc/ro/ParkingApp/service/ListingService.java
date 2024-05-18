@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import unibuc.ro.ParkingApp.exception.FileNotDeleted;
 import unibuc.ro.ParkingApp.exception.ListingNotFound;
 import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.listing.ListingRequest;
@@ -37,16 +38,7 @@ public class ListingService {
     public List<MinimalListing> getAllListings(){
         log.info("Getting all listings");
         List<Listing> listingsFromDB = repository.findAll();
-        List<MinimalListing> minimalListings = new ArrayList<>();
-        log.info("Converting Listings into MinimalListings");
-        for (Listing listing : listingsFromDB) {
-            byte[] mainPictureBytes = fileService.loadPicture(listing.getMainPicture());
-            MinimalListing minimalListing = listingMapper.listingToMinimalListing(listing);
-            minimalListing.setMainPicture(mainPictureBytes);
-            minimalListings.add(minimalListing);
-        }
-        log.info("returning minimalListings");
-        return minimalListings;
+        return convertListingsToMinimalListings(listingsFromDB);
 
     }
 
@@ -70,9 +62,16 @@ public class ListingService {
     public Listing updateListing(ListingRequest listingRequest, UUID listingUUID){
         Listing listing = getListing(listingUUID);
         listingMapper.fill(listingRequest,listing);
-        // pictures should be deleted at this step
+        // todo maybe find a way to do this more optimal ( not just delete all pictures and them add them back)
+        deleteListingPictures(listing);
         repository.save(listing);
         return listing;
+    }
+    public void deleteListing(UUID listingUUID){
+        // todo check if request was done by publishing user or admin
+        Listing listing = getListing(listingUUID);
+        deleteListingPictures(listing);
+        repository.delete(listing);
     }
     public synchronized void addPhotoToListing(UUID listingUUID, MultipartFile file, PictureType pictureType){
         log.info("Adding " + file.getOriginalFilename() + " to listing "  + listingUUID + " ..." );
@@ -91,12 +90,37 @@ public class ListingService {
         }
         return listingsFromDB.get();
     }
+    public List<MinimalListing> getUserMinimalListings(String tokenSubClaim){
+        List<Listing> listings = userService.getUserListings(tokenSubClaim);
+        return convertListingsToMinimalListings(listings);
+    }
 
     private void addPicturesToListingResponse(ListingResponse listingResponse, List<String> pictures){
         for (String picture : pictures){
             listingResponse.addPicture(fileService.loadPicture(picture));
         }
     }
-
+    private void deleteListingPictures(Listing listing){
+        try {
+            fileService.deleteFile(listing.getMainPicture());
+            for (String picture : listing.getPictures()){
+                fileService.deleteFile(picture);
+            }
+        }catch(FileNotDeleted e){
+            log.error(e.toString());
+        }
+    }
+    private List<MinimalListing> convertListingsToMinimalListings(List<Listing> listings){
+        log.info("Converting Listings into MinimalListings");
+        List<MinimalListing> minimalListings = new ArrayList<>();
+        for (Listing listing : listings) {
+            byte[] mainPictureBytes = fileService.loadPicture(listing.getMainPicture());
+            MinimalListing minimalListing = listingMapper.listingToMinimalListing(listing);
+            minimalListing.setMainPicture(mainPictureBytes);
+            minimalListings.add(minimalListing);
+        }
+        log.info("returning minimalListings");
+        return minimalListings;
+    }
 
 }

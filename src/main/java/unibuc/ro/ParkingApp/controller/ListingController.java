@@ -39,6 +39,11 @@ public class ListingController {
     public ResponseEntity<ListingResponse> getListing(@PathVariable UUID listingUUID){
         return new ResponseEntity<>(listingService.getListingResponse(listingUUID), HttpStatus.OK);
     }
+    @GetMapping("/userListings")
+    public ResponseEntity<List<MinimalListing>> getUserListings(Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(listingService.getUserMinimalListings((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+    }
     @PutMapping("/{listingUUID}")
     public ResponseEntity<Listing> updateListing(@PathVariable UUID listingUUID, @RequestBody ListingRequest listingRequest){
         return new ResponseEntity<>(listingService.updateListing(listingRequest, listingUUID),  HttpStatus.OK);
@@ -52,6 +57,11 @@ public class ListingController {
     public ResponseEntity<String> addMainPictureToListing(@PathVariable UUID listingUUID, @RequestBody MultipartFile file){
         listingService.addPhotoToListing(listingUUID, file, PictureType.MAIN_PICTURE);
         return new ResponseEntity<>(String.format(ApplicationConstants.LISTING_PHOTO_ADDED, listingUUID), HttpStatus.OK);
+    }
+    @DeleteMapping("/{listingUUID}")
+    public ResponseEntity<String> deleteListing(@PathVariable UUID listingUUID){
+        listingService.deleteListing(listingUUID);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

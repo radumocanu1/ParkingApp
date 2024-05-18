@@ -3,6 +3,7 @@ package unibuc.ro.ParkingApp.service;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import unibuc.ro.ParkingApp.exception.FileNotDeleted;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -51,5 +52,12 @@ public class FileService {
     public byte[] loadPicture(String picturePath)  {
         Path filePath = Paths.get(picturePath);
         return Files.readAllBytes(filePath);
+    }
+    public void deleteFile(String picturePath)  {
+        Path filePath = Paths.get(picturePath);
+        if (!filePath.toFile().delete()){
+            throw new FileNotDeleted("Failed to delete picture");
+        }
+
     }
 }

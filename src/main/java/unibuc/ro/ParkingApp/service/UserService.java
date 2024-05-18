@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.OIDC.Keycloak.KeycloakAdminService;
 import unibuc.ro.ParkingApp.exception.OIDCUserNotFound;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
+import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.user.*;
 import unibuc.ro.ParkingApp.repository.UserRepository;
 import unibuc.ro.ParkingApp.service.mapper.UserMapper;
@@ -54,7 +55,12 @@ public class UserService {
         log.info("User successfully deleted");
 
     }
-
+    public List<Listing> getUserListings(String tokenSubClaim){
+        log.info("Getting user listings...");
+        OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
+        User user = oidcUserMapping.getUser();
+        return user.getListings();
+    }
     public User createUser(String tokenSubClaim, String tokenNameClaim, String tokenEmail){
         log.info("Creating user...");
         CreateUserRequest createUserRequest = new CreateUserRequest(tokenNameClaim, tokenEmail);
