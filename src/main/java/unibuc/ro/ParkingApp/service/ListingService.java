@@ -64,14 +64,18 @@ public class ListingService {
         listingMapper.fill(listingRequest,listing);
         // todo maybe find a way to do this more optimal ( not just delete all pictures and them add them back)
         deleteListingPictures(listing);
+        listing.setPictures(new ArrayList<>());
+        listing.setMainPicture(null);
         repository.save(listing);
         return listing;
     }
     public void deleteListing(UUID listingUUID){
+        log.info("deleting listing with UUID {} ...", listingUUID);
         // todo check if request was done by publishing user or admin
         Listing listing = getListing(listingUUID);
-        deleteListingPictures(listing);
+        fileService.deleteDirectory(listingUUID);
         repository.delete(listing);
+        log.info("successfully deleted listing!");
     }
     public synchronized void addPhotoToListing(UUID listingUUID, MultipartFile file, PictureType pictureType){
         log.info("Adding " + file.getOriginalFilename() + " to listing "  + listingUUID + " ..." );
@@ -110,6 +114,7 @@ public class ListingService {
             log.error(e.toString());
         }
     }
+
     private List<MinimalListing> convertListingsToMinimalListings(List<Listing> listings){
         log.info("Converting Listings into MinimalListings");
         List<MinimalListing> minimalListings = new ArrayList<>();

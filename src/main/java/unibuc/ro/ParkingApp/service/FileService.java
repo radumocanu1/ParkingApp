@@ -2,6 +2,7 @@ package unibuc.ro.ParkingApp.service;
 
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.exception.FileNotDeleted;
 
@@ -58,6 +59,16 @@ public class FileService {
         if (!filePath.toFile().delete()){
             throw new FileNotDeleted("Failed to delete picture");
         }
+
+    }
+    public void deleteDirectory(UUID listingUUID) {
+        Path directoryPath = Paths.get(ROOT_DIRECTORY, listingUUID.toString());
+        try {
+            FileSystemUtils.deleteRecursively(directoryPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 }
