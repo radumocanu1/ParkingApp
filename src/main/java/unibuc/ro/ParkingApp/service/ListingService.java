@@ -34,21 +34,22 @@ public class ListingService {
     OIDCUserMappingService oidcUserMappingService;
     FileService fileService;
 
-    public List<Listing> getAllListings(){
+    public List<MinimalListing> getAllListings(){
+        log.info("Getting all listings");
         List<Listing> listingsFromDB = repository.findAll();
-        return listingsFromDB.stream().toList();
-    }
-    public List<ListingResponse> getAllListingsResponses(){
-        List<Listing> listingsFromDB = repository.findAll();
-        List<ListingResponse> listingResponses = new ArrayList<>();
+        List<MinimalListing> minimalListings = new ArrayList<>();
+        log.info("Converting Listings into MinimalListings");
         for (Listing listing : listingsFromDB) {
-            listingResponses.add(getListingResponse(listing.getListingUUID()));
+            byte[] mainPictureBytes = fileService.loadPicture(listing.getMainPicture());
+            MinimalListing minimalListing = listingMapper.listingToMinimalListing(listing);
+            minimalListing.setMainPicture(mainPictureBytes);
+            minimalListings.add(minimalListing);
         }
-        return listingResponses;
+        log.info("returning minimalListings");
+        return minimalListings;
+
     }
-//    public List<MinimalListing> getAllMinimalListings(){
-//
-//    }
+
     public ListingResponse getListingResponse(UUID listingId){
         Listing listing = getListing(listingId);
         ListingResponse listingResponse = listingMapper.listingToListingResponse(listing);

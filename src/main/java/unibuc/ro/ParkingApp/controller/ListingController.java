@@ -12,6 +12,7 @@ import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.listing.ListingRequest;
 import unibuc.ro.ParkingApp.model.PictureType;
 import unibuc.ro.ParkingApp.model.listing.ListingResponse;
+import unibuc.ro.ParkingApp.model.listing.MinimalListing;
 import unibuc.ro.ParkingApp.service.ListingService;
 
 import java.security.Principal;
@@ -30,13 +31,8 @@ public class ListingController {
 
     }
     @GetMapping()
-    public ResponseEntity<List<Listing>> getAllListings(){
+    public ResponseEntity<List<MinimalListing>> getAllListings(){
         return new ResponseEntity<>(listingService.getAllListings(), HttpStatus.OK);
-    }
-    // only for current test
-    @GetMapping("/test")
-    public ResponseEntity<List<ListingResponse>> getAllListingsResponses(){
-        return new ResponseEntity<>(listingService.getAllListingsResponses(), HttpStatus.OK);
     }
 
     @GetMapping("/{listingUUID}")

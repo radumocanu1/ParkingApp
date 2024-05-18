@@ -27,7 +27,6 @@ public class Listing {
     UUID listingUUID;
     @ManyToOne
     @JoinColumn(name = "userUUID", nullable = false)
-    @JsonIgnore
     User user;
     private String mainPicture;
     private String title;
@@ -51,6 +50,7 @@ public class Listing {
 
     // this will always be the "per/day" price
     int price;
+    int rating;
 
     public void addPicture(String picture, PictureType pictureType) {
         if (pictureType == PictureType.MAIN_PICTURE)

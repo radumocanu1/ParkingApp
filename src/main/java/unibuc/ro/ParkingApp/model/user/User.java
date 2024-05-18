@@ -25,6 +25,7 @@ public class User {
     String username;
     String email;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Listing> listings = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Feedback> feedbackList = new ArrayList<>();
