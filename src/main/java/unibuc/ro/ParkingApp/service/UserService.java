@@ -8,8 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.OIDC.Keycloak.KeycloakAdminService;
 import unibuc.ro.ParkingApp.exception.OIDCUserNotFound;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
+import unibuc.ro.ParkingApp.model.chat.Chat;
 import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.user.*;
+import unibuc.ro.ParkingApp.repository.ChatRepository;
 import unibuc.ro.ParkingApp.repository.UserRepository;
 import unibuc.ro.ParkingApp.service.mapper.UserMapper;
 
@@ -77,29 +79,36 @@ public class UserService {
     public User getUserById(UUID uuid){
         return tryToGetUser(uuid);
     }
-    public User getUserProfile(String tokenSubClaim){
+    public UserResponse getUserProfile(String tokenSubClaim){
 
         log.info("Getting user profile ... sub claim -> " + tokenSubClaim);
-        OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
+        User user = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
         log.info("User profile was successfully fetched!");
-        return oidcUserMapping.getUser();
+        UserResponse userResponse = userMapper.userToUserResponse(user);
+        if (user.isHasProfilePicture()){
+            userResponse.setProfilePictureBytes(fileService.loadPicture(user.getProfilePicturePath()));
+        }
+        return userResponse;
     }
     public void updateUserRating(User user){
         user.computeNewRating();
         repository.save(user);
     }
+
     public void changeProfilePicture(String tokenSubClaim, MultipartFile profilePicture){
         log.info("Changing profile picture... sub claim -> " + tokenSubClaim);
         OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
         User user = oidcUserMapping.getUser();
-        user.setProfilePictureBytes(fileService.extractFileBytes(profilePicture));
+        user.setProfilePicturePath(fileService.saveProfilePicture(user.getUserUUID(), profilePicture));
         user.setHasProfilePicture(true);
         repository.save(user);
 
         log.info("Profile picture was successfully set!");
 
     }
-
+    public User saveUser(User user){
+        return repository.save(user);
+    }
     private User tryToGetUser(UUID uuid){
         Optional<User> userFromDB = repository.findById(uuid);
         if (userFromDB.isEmpty()){

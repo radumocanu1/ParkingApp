@@ -3,14 +3,12 @@ package unibuc.ro.ParkingApp.model.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.log4j.Log4j2;
+import unibuc.ro.ParkingApp.model.chat.Chat;
 import unibuc.ro.ParkingApp.model.feedback.Feedback;
 import unibuc.ro.ParkingApp.model.listing.Listing;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "user")
@@ -29,16 +27,21 @@ public class User {
     private List<Listing> listings = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Feedback> feedbackList = new ArrayList<>();
+    @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_chats", joinColumns = @JoinColumn(name = "userUUID"))
+    @Column(name = "chats", nullable = false)
+    private List<UUID> chats = new ArrayList<>();
+
     private boolean isTrusted;
     private double rating;
     private boolean hasProfilePicture ;
-    @Column(name = "profile_picture_bytes", columnDefinition = "LONGBLOB")
-    private byte[] profilePictureBytes;
+    private String profilePicturePath;
     private String phoneNumber;
     private String firstName;
     private String lastName;
     private String sex;
     private int age;
+
 
 
 
@@ -53,4 +56,8 @@ public class User {
         this.rating = Double.parseDouble(formattedRating);
 
     }
+    public void addChat(UUID chatUUID) {
+        this.chats.add(chatUUID);
+    }
+
 }

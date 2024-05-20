@@ -6,5 +6,6 @@ public interface ApplicationConstants {
     String LISTING_NOT_FOUND_TEMPLATE = "Listing with UUID %s was not found in DB";
     String PROFILE_PICTURE_UPDATED = "The user with sub %s successfully updated the profile picture";
     String LISTING_PHOTO_ADDED = "New photo has been successfully added to listing with id -> %s";
+    String MESSAGE_SENT = "Message was sent";
 
 }

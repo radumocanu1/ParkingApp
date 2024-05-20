@@ -14,22 +14,17 @@ import java.util.UUID;
 
 @Service
 public class FileService {
-    private static final String ROOT_DIRECTORY = "listingPicture";
+    private static final String LISTING_PICTURES_DIR = "listingPictures";
+    private static final String PROFILE_PICTURES_DIR = "profilePictures";
 
-    private final Path root = Paths.get(ROOT_DIRECTORY);
 
-    public byte[] extractFileBytes(MultipartFile file) {
-        try {
-            return file.getBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private final Path root = Paths.get(LISTING_PICTURES_DIR);
+
 
     // todo handle this with ResponseEntityExceptionHandler
     @SneakyThrows
     public String saveFile(UUID listingUUID, MultipartFile file) {
-        Path directoryPath = Paths.get(ROOT_DIRECTORY, listingUUID.toString());
+        Path directoryPath = Paths.get(LISTING_PICTURES_DIR, listingUUID.toString());
         if (!Files.exists(directoryPath)) {
             Files.createDirectories(directoryPath);
         }
@@ -38,6 +33,16 @@ public class FileService {
         String newFileName = UUID.randomUUID() + fileExtension;
         Path filePath = directoryPath.resolve(newFileName);
         Files.copy(file.getInputStream(), filePath);
+        return filePath.toString();
+    }
+    @SneakyThrows
+    public String saveProfilePicture(UUID userUUID, MultipartFile file) {
+        Path directoryPath = Paths.get(PROFILE_PICTURES_DIR);
+
+        String fileExtension = getFileExtension(file.getOriginalFilename());
+        String newFileName = userUUID + fileExtension;
+        Path filePath = directoryPath.resolve(newFileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         return filePath.toString();
     }
 
@@ -62,7 +67,7 @@ public class FileService {
 
     }
     public void deleteDirectory(UUID listingUUID) {
-        Path directoryPath = Paths.get(ROOT_DIRECTORY, listingUUID.toString());
+        Path directoryPath = Paths.get(LISTING_PICTURES_DIR, listingUUID.toString());
         try {
             FileSystemUtils.deleteRecursively(directoryPath);
         } catch (IOException e) {

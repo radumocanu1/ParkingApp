@@ -9,8 +9,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
+import unibuc.ro.ParkingApp.model.chat.Chat;
 import unibuc.ro.ParkingApp.model.user.UpdateUserRequest;
 import unibuc.ro.ParkingApp.model.user.User;
+import unibuc.ro.ParkingApp.model.user.UserResponse;
 import unibuc.ro.ParkingApp.service.UserService;
 
 import java.security.Principal;
@@ -54,7 +56,7 @@ public class UserController {
 
     }
     @GetMapping("/profile")
-    public ResponseEntity<User> getUserProfile(Principal principal){
+    public ResponseEntity<UserResponse> getUserProfile(Principal principal){
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
         return new ResponseEntity<>(userService.getUserProfile((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
     }
@@ -65,5 +67,6 @@ public class UserController {
         userService.changeProfilePicture(subClaim, multipartFile);
         return new ResponseEntity<>(String.format(ApplicationConstants.PROFILE_PICTURE_UPDATED, subClaim), HttpStatus.OK);
     }
+
 
 }
