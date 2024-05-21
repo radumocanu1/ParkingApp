@@ -33,7 +33,6 @@ public class Listing {
     String latitude;
     String longitude;
     Date startDate;
-    Date endDate;
     int parkingSpotSlotNumber;
     int sector;
     String location;

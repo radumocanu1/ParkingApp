@@ -31,6 +31,7 @@ public class ListingResponse {
     int price;
     int sector;
     String location;
+    boolean myListing;
 
     public void addPicture(byte[] picture) {
         this.pictures.add(picture);

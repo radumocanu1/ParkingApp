@@ -42,12 +42,14 @@ public class ListingService {
 
     }
 
-    public ListingResponse getListingResponse(UUID listingId){
+    public ListingResponse getListingResponse(String tokenSubClaim, UUID listingId){
         Listing listing = getListing(listingId);
+        UUID currentUserUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
         ListingResponse listingResponse = listingMapper.listingToListingResponse(listing);
         listingResponse.setMainPicture(fileService.loadPicture(listing.getMainPicture()));
         addPicturesToListingResponse(listingResponse,listing.getPictures());
         listingResponse.setMinimalUser(userService.createMinimalUser(listing.getUser()));
+        listingResponse.setMyListing(currentUserUUID == listing.getUser().getUserUUID());
         return listingResponse;
     }
     public Listing createListing(ListingRequest listingRequest, String tokenSubClaim){

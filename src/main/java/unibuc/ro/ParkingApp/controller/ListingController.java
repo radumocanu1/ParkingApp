@@ -36,8 +36,9 @@ public class ListingController {
     }
 
     @GetMapping("/{listingUUID}")
-    public ResponseEntity<ListingResponse> getListing(@PathVariable String listingUUID){
-        return new ResponseEntity<>(listingService.getListingResponse(UUID.fromString(listingUUID)), HttpStatus.OK);
+    public ResponseEntity<ListingResponse> getListing(@PathVariable String listingUUID, Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(listingService.getListingResponse((String) token.getTokenAttributes().get("sub"),UUID.fromString(listingUUID)), HttpStatus.OK);
     }
     @GetMapping("/userListings")
     public ResponseEntity<List<MinimalListing>> getUserListings(Principal principal){
