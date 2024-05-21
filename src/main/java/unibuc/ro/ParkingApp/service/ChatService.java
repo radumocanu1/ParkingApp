@@ -24,7 +24,9 @@ public class ChatService {
     private final OIDCUserMappingService oidcUserMappingService;
     private final ChatMapper chatMapper;
     private final MessageRepository messageRepository;
-    public Chat createChat(String tokenSubClaim, UUID otherUserUUID) {
+    private final FileService fileService;
+
+    public ChatResponse createChat(String tokenSubClaim, UUID otherUserUUID) {
         log.info("Creating new chat... ");
         User currentUser = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
         User otherUser = userService.getUserById(otherUserUUID);
@@ -34,7 +36,7 @@ public class ChatService {
         otherUser.addChat(currentUser.getUserUUID(), chat.getChatUUID());
         userService.saveUser(otherUser);
         userService.saveUser(currentUser);
-        return chat;
+        return createChatResponse(chat,otherUser);
 
     }
     public void sendMessage(UUID chatUUID, String tokenSubClaim, MessageRequest messageRequest) {
@@ -57,10 +59,21 @@ public class ChatService {
     public List<Chat> getAllChats() {
         return chatRepository.findAll();
     }
-    // todo response exception handler
-    public Chat getChatById(UUID chatUUID) {
-        return getChat(chatUUID);
+    public ChatResponse getChatById(UUID chatUUID, String tokenSubClaim) {
+        log.info("Getting chat by UUID...");
+        UUID currentUserUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
+        Chat chat =  getChat(chatUUID);
+        UUID otherUserUUID;
+        if (chat.getUser1UUID().equals(currentUserUUID)) {
+            otherUserUUID = chat.getUser2UUID();
+        }
+        else{
+            otherUserUUID = chat.getUser1UUID();
+        }
+        User otherUser = userService.getUserById(otherUserUUID);
+        return createChatResponse(chat,otherUser);
     }
+    // todo response exception handler
     private Chat getChat(UUID chatUUID) {
         Optional<Chat> chat = chatRepository.findById(chatUUID);
         if (chat.isEmpty()) {
@@ -68,14 +81,29 @@ public class ChatService {
         }
         return chat.get();
     }
-    public Chat getChat(UUID otherUserUUID, String tokenSubClaim) {
+    public ChatResponse getChat(UUID otherUserUUID, String tokenSubClaim) {
         User currentUser = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
         UUID chatUUID = currentUser.getChats().get(otherUserUUID);
         if (chatUUID == null) {
             throw new ChatNotFound("Chat not found");
         }
-        return getChat(chatUUID);
+        User otherUser = userService.getUserById(otherUserUUID);
+        Chat chat =  getChat(chatUUID);
+        return createChatResponse(chat,otherUser);
 
+
+    }
+    private ChatResponse createChatResponse (Chat chat, User otherUser){
+        log.info("Creating chat response...");
+        ChatResponse chatResponse = new ChatResponse();
+        chatResponse.setChatUUID(chat.getChatUUID());
+        chatResponse.setOtherUserUUID(otherUser.getUserUUID());
+        if (otherUser.isHasProfilePicture())
+            chatResponse.setOtherUserProfileImage(fileService.loadPicture(otherUser.getProfilePicturePath()));
+        chatResponse.setOtherUserName(otherUser.getUsername());
+        chatResponse.setMessages(chat.getMessages());
+        log.info("Chat response created");
+        return chatResponse;
     }
 
 

@@ -28,10 +28,10 @@ public class UserChatMapping {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "userUUID", nullable = false)
+    @Column(name = "userUUID")
     private UUID userUUID;
 
-    @Column(name = "chatUUID", nullable = false)
+    @Column(name = "chatUUID")
     private UUID chatKey;
 
 }

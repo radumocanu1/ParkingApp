@@ -12,6 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 public class ChatResponse {
+    UUID chatUUID;
     UUID otherUserUUID;
     byte[] otherUserProfileImage;
     String otherUserName;
