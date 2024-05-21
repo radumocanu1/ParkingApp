@@ -2,16 +2,12 @@ package unibuc.ro.ParkingApp.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.OIDC.Keycloak.KeycloakAdminService;
-import unibuc.ro.ParkingApp.exception.OIDCUserNotFound;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
-import unibuc.ro.ParkingApp.model.chat.Chat;
 import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.user.*;
-import unibuc.ro.ParkingApp.repository.ChatRepository;
 import unibuc.ro.ParkingApp.repository.UserRepository;
 import unibuc.ro.ParkingApp.service.mapper.UserMapper;
 
@@ -106,8 +102,14 @@ public class UserService {
         log.info("Profile picture was successfully set!");
 
     }
-    public User saveUser(User user){
-        return repository.save(user);
+    public void saveUser(User user){
+        repository.save(user);
+    }
+    public MinimalUser createMinimalUser(User user){
+        MinimalUser minimalUser = userMapper.userToMinimalUser(user);
+        if (user.isHasProfilePicture())
+            minimalUser.setProfilePicture(fileService.loadPicture(user.getProfilePicturePath()));
+        return minimalUser;
     }
     private User tryToGetUser(UUID uuid){
         Optional<User> userFromDB = repository.findById(uuid);

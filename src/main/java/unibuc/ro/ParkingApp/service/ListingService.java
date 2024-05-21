@@ -47,6 +47,7 @@ public class ListingService {
         ListingResponse listingResponse = listingMapper.listingToListingResponse(listing);
         listingResponse.setMainPicture(fileService.loadPicture(listing.getMainPicture()));
         addPicturesToListingResponse(listingResponse,listing.getPictures());
+        listingResponse.setMinimalUser(userService.createMinimalUser(listing.getUser()));
         return listingResponse;
     }
     public Listing createListing(ListingRequest listingRequest, String tokenSubClaim){
@@ -80,7 +81,7 @@ public class ListingService {
     public synchronized void addPhotoToListing(UUID listingUUID, MultipartFile file, PictureType pictureType){
         log.info("Adding " + file.getOriginalFilename() + " to listing "  + listingUUID + " ..." );
         Listing listing = getListing(listingUUID);
-        listing.addPicture(fileService.saveFile(listingUUID,file), pictureType);
+        listing.addPicture(fileService.saveFile(listingUUID.toString(),file), pictureType);
         repository.save(listing);
         log.info("Photo successfully added!" );
 

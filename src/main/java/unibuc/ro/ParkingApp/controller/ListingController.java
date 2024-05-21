@@ -36,8 +36,8 @@ public class ListingController {
     }
 
     @GetMapping("/{listingUUID}")
-    public ResponseEntity<ListingResponse> getListing(@PathVariable UUID listingUUID){
-        return new ResponseEntity<>(listingService.getListingResponse(listingUUID), HttpStatus.OK);
+    public ResponseEntity<ListingResponse> getListing(@PathVariable String listingUUID){
+        return new ResponseEntity<>(listingService.getListingResponse(UUID.fromString(listingUUID)), HttpStatus.OK);
     }
     @GetMapping("/userListings")
     public ResponseEntity<List<MinimalListing>> getUserListings(Principal principal){
@@ -45,22 +45,22 @@ public class ListingController {
         return new ResponseEntity<>(listingService.getUserMinimalListings((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
     }
     @PutMapping("/{listingUUID}")
-    public ResponseEntity<Listing> updateListing(@PathVariable UUID listingUUID, @RequestBody ListingRequest listingRequest){
-        return new ResponseEntity<>(listingService.updateListing(listingRequest, listingUUID),  HttpStatus.OK);
+    public ResponseEntity<Listing> updateListing(@PathVariable String listingUUID, @RequestBody ListingRequest listingRequest){
+        return new ResponseEntity<>(listingService.updateListing(listingRequest, UUID.fromString(listingUUID)),  HttpStatus.OK);
     }
     @PatchMapping("/picture/{listingUUID}")
-    public ResponseEntity<String> addPictureToListing(@PathVariable UUID listingUUID, @RequestBody MultipartFile file){
-        listingService.addPhotoToListing(listingUUID, file, PictureType.REGULAR_PICTURE);
+    public ResponseEntity<String> addPictureToListing(@PathVariable String listingUUID, @RequestBody MultipartFile file){
+        listingService.addPhotoToListing(UUID.fromString(listingUUID), file, PictureType.REGULAR_PICTURE);
         return new ResponseEntity<>(String.format(ApplicationConstants.LISTING_PHOTO_ADDED, listingUUID), HttpStatus.OK);
     }
     @PatchMapping("/main-picture/{listingUUID}")
-    public ResponseEntity<String> addMainPictureToListing(@PathVariable UUID listingUUID, @RequestBody MultipartFile file){
-        listingService.addPhotoToListing(listingUUID, file, PictureType.MAIN_PICTURE);
+    public ResponseEntity<String> addMainPictureToListing(@PathVariable String listingUUID, @RequestBody MultipartFile file){
+        listingService.addPhotoToListing(UUID.fromString(listingUUID), file, PictureType.MAIN_PICTURE);
         return new ResponseEntity<>(String.format(ApplicationConstants.LISTING_PHOTO_ADDED, listingUUID), HttpStatus.OK);
     }
     @DeleteMapping("/{listingUUID}")
-    public ResponseEntity<String> deleteListing(@PathVariable UUID listingUUID){
-        listingService.deleteListing(listingUUID);
+    public ResponseEntity<String> deleteListing(@PathVariable String listingUUID){
+        listingService.deleteListing(UUID.fromString(listingUUID));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

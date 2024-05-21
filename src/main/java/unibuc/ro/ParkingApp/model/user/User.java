@@ -27,10 +27,11 @@ public class User {
     private List<Listing> listings = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Feedback> feedbackList = new ArrayList<>();
-    @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_chats", joinColumns = @JoinColumn(name = "userUUID"))
-    @Column(name = "chats", nullable = false)
-    private List<UUID> chats = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "user_chats_mapping", joinColumns = @JoinColumn(name = "userUUID"))
+    @MapKeyColumn(name = "chatKey")
+    @Column(name = "chatValue")
+    private Map<UUID, UUID> chats;
 
     private boolean isTrusted;
     private double rating;
@@ -56,8 +57,8 @@ public class User {
         this.rating = Double.parseDouble(formattedRating);
 
     }
-    public void addChat(UUID chatUUID) {
-        this.chats.add(chatUUID);
+    public void addChat(UUID userUUID, UUID chatUUID) {
+        this.chats.put(userUUID, chatUUID);
     }
 
 }

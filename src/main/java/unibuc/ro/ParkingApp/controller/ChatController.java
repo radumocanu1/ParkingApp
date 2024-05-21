@@ -37,6 +37,11 @@ public class ChatController {
         return new ResponseEntity<>(ApplicationConstants.MESSAGE_SENT, HttpStatus.OK);
 
     }
+    @GetMapping("/try/{otherUserUUID}")
+    public ResponseEntity<Chat> tryToGetChat(@PathVariable UUID otherUserUUID, Principal principal) {
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(chatService.getChat(otherUserUUID,(String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+    }
     @GetMapping("/{chatUUID}")
     public ResponseEntity<Chat> getChatById(@PathVariable UUID chatUUID, Principal principal) {
         return new ResponseEntity<>(chatService.getChatById(chatUUID), HttpStatus.OK);

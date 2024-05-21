@@ -6,8 +6,6 @@ import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.exception.FileNotDeleted;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.UUID;
@@ -23,8 +21,8 @@ public class FileService {
 
     // todo handle this with ResponseEntityExceptionHandler
     @SneakyThrows
-    public String saveFile(UUID listingUUID, MultipartFile file) {
-        Path directoryPath = Paths.get(LISTING_PICTURES_DIR, listingUUID.toString());
+    public String saveFile(String listingUUID, MultipartFile file) {
+        Path directoryPath = Paths.get(LISTING_PICTURES_DIR, listingUUID);
         if (!Files.exists(directoryPath)) {
             Files.createDirectories(directoryPath);
         }
@@ -54,10 +52,13 @@ public class FileService {
     }
     // todo same as above
 
-    @SneakyThrows
-    public byte[] loadPicture(String picturePath)  {
+    public byte[] loadPicture(String picturePath) {
         Path filePath = Paths.get(picturePath);
-        return Files.readAllBytes(filePath);
+        try {
+            return Files.readAllBytes(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     public void deleteFile(String picturePath)  {
         Path filePath = Paths.get(picturePath);
