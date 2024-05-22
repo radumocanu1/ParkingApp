@@ -26,7 +26,7 @@ public class ListingResponse {
     Date startDate;
     Date endDate;
     int parkingSpotSlotNumber;
-    @JsonFormat(with = JsonFormat.Feature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,  shape = JsonFormat.Shape.STRING, pattern = "MM-dd HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     LocalDateTime publishingDate;
     int price;
     int sector;

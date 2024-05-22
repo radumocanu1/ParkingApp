@@ -20,10 +20,6 @@ public class ListingRequest {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 
     Date startDate;
-    @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-
-    Date endDate;
     String latitude;
     String longitude;
     int parkingSpotSlotNumber;
