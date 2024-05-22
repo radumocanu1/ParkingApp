@@ -7,9 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
-import unibuc.ro.ParkingApp.model.chat.Chat;
-import unibuc.ro.ParkingApp.model.chat.ChatResponse;
-import unibuc.ro.ParkingApp.model.chat.MessageRequest;
+import unibuc.ro.ParkingApp.model.chat.*;
 import unibuc.ro.ParkingApp.service.ChatService;
 
 import java.security.Principal;
@@ -49,8 +47,13 @@ public class ChatController {
         return new ResponseEntity<>(chatService.getChatById(chatUUID,(String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
     }
     @GetMapping("/user")
-    public ResponseEntity<List<Chat>> getChats(Principal principal){
+    public ResponseEntity<List<MinimalChat>> getChats(Principal principal){
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
         return new ResponseEntity<>(chatService.getAllUserChats((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+    }
+    @GetMapping("/unread")
+    public ResponseEntity<UnreadChatResponse> getUnreadChats(Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(chatService.checkForUnreadMessages((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
     }
 }

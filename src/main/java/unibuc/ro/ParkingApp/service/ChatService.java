@@ -11,6 +11,7 @@ import unibuc.ro.ParkingApp.repository.ChatRepository;
 import unibuc.ro.ParkingApp.repository.MessageRepository;
 import unibuc.ro.ParkingApp.service.mapper.ChatMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,6 +44,9 @@ public class ChatService {
         log.info("Sending a message to chat... ");
         UUID currentUserUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
         Chat chat = getChat(chatUUID);
+        User otherUser = userService.getUserById(getOtherUserUUID(chat, currentUserUUID));
+        otherUser.addUnreadMessage(chatUUID);
+        userService.saveUser(otherUser);
         Message message = chatMapper.messageRequestToMessage(messageRequest);
         message.setChat(chat);
         message.setSenderUUID(currentUserUUID);
@@ -50,10 +54,20 @@ public class ChatService {
         log.info("Message sent to chat... ");
 
     }
-    public List<Chat> getAllUserChats(String tokenSubClaim){
+    public List<MinimalChat> getAllUserChats(String tokenSubClaim){
         log.info("Getting user chats...");
         User user = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
-        return chatRepository.findAllById(user.getChats().values());
+        UUID currentUserUUID = user.getUserUUID();
+        List<Chat> userChats =  chatRepository.findAllById(user.getChats().values());
+        log.info("Converting to minimal chats...");
+        List<MinimalChat> minimalChats = new ArrayList<>();
+        for(Chat chat : userChats){
+            minimalChats.add(chatToMinimalChat(chat,userService.getUserById(getOtherUserUUID(chat,currentUserUUID)), user));
+        }
+        log.info("Minimal chats created!");
+        return minimalChats;
+
+
     }
 
     public List<Chat> getAllChats() {
@@ -61,16 +75,11 @@ public class ChatService {
     }
     public ChatResponse getChatById(UUID chatUUID, String tokenSubClaim) {
         log.info("Getting chat by UUID...");
-        UUID currentUserUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
+        User currentUser = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
         Chat chat =  getChat(chatUUID);
-        UUID otherUserUUID;
-        if (chat.getUser1UUID().equals(currentUserUUID)) {
-            otherUserUUID = chat.getUser2UUID();
-        }
-        else{
-            otherUserUUID = chat.getUser1UUID();
-        }
-        User otherUser = userService.getUserById(otherUserUUID);
+        User otherUser = userService.getUserById(getOtherUserUUID(chat,currentUser.getUserUUID()));
+        currentUser.removeUnreadMessage(chatUUID);
+        userService.saveUser(otherUser);
         return createChatResponse(chat,otherUser);
     }
     // todo response exception handler
@@ -80,6 +89,15 @@ public class ChatService {
             throw new RuntimeException();
         }
         return chat.get();
+    }
+    public void deleteChat(UUID chatUUID) {
+        log.info("Deleting chat... ");
+        chatRepository.deleteById(chatUUID);
+    }
+    public UnreadChatResponse checkForUnreadMessages(String tokenSubClaim) {
+        log.info("Checking for unread messages...");
+        User user = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
+        return new UnreadChatResponse(user.getUnreadChats().size());
     }
     public ChatResponse getChat(UUID otherUserUUID, String tokenSubClaim) {
         User currentUser = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
@@ -104,6 +122,20 @@ public class ChatService {
         chatResponse.setMessages(chat.getMessages());
         log.info("Chat response created");
         return chatResponse;
+    }
+    private MinimalChat chatToMinimalChat(Chat chat, User otherUser, User currentUser){
+        MinimalChat minimalChat = new MinimalChat();
+        minimalChat.setChatUUID(chat.getChatUUID());
+        minimalChat.setLastMessage(chat.getMessages().get(chat.getMessages().size() - 1).getMessageContent());
+        minimalChat.setHasUnreadMessages(currentUser.getUnreadChats().contains(chat.getChatUUID()));
+        minimalChat.setOtherUserProfilePicture(fileService.loadPicture(otherUser.getProfilePicturePath()));
+        minimalChat.setOtherUsername(otherUser.getUsername());
+        return minimalChat;
+    }
+    private UUID getOtherUserUUID(Chat chat, UUID currentUserUUID){
+        if (chat.getUser1UUID().equals(currentUserUUID))
+            return chat.getUser2UUID();
+        return chat.getUser1UUID();
     }
 
 

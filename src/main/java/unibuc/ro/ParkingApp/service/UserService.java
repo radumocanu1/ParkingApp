@@ -43,7 +43,7 @@ public class UserService {
         log.info("User successfully updated!");
         return existingUser;
     }
-
+    // todo chats should be deleted at this step ( currently not happening because of current internal implementation of many to many)
     public void deleteUser(String tokenSubClaim){
         log.info("Deleting user... " + tokenSubClaim);
         OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);

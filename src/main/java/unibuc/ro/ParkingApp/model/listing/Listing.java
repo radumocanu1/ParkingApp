@@ -40,7 +40,7 @@ public class Listing {
     LocalDateTime publishingDate;
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "pictures", joinColumns = @JoinColumn(name = "listingUUID"))
-    @Column(name = "picture", nullable = false)
+    @Column(name = "picture")
     private List<String> pictures;
     // enable optimistic locking
     // todo add this to documentation (possibility of optimistic locking)

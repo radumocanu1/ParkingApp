@@ -32,6 +32,11 @@ public class User {
     @MapKeyColumn(name = "chatKey")
     @Column(name = "chatValue")
     private Map<UUID, UUID> chats;
+    @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "unread_chats", joinColumns = @JoinColumn(name = "userUUID"))
+    @Column(name = "unread_chat")
+    @JsonIgnore
+    private Set<UUID> unreadChats = new HashSet<>();
 
     private boolean isTrusted;
     private double rating;
@@ -59,6 +64,12 @@ public class User {
     }
     public void addChat(UUID userUUID, UUID chatUUID) {
         this.chats.put(userUUID, chatUUID);
+    }
+    public void addUnreadMessage(UUID chatUUID) {
+        this.unreadChats.add(chatUUID);
+    }
+    public void removeUnreadMessage(UUID chatUUID) {
+        this.unreadChats.remove(chatUUID);
     }
 
 }
