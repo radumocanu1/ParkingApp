@@ -8,11 +8,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
-import unibuc.ro.ParkingApp.model.listing.Listing;
-import unibuc.ro.ParkingApp.model.listing.ListingRequest;
+import unibuc.ro.ParkingApp.model.listing.*;
 import unibuc.ro.ParkingApp.model.PictureType;
-import unibuc.ro.ParkingApp.model.listing.ListingResponse;
-import unibuc.ro.ParkingApp.model.listing.MinimalListing;
 import unibuc.ro.ParkingApp.service.ListingService;
 
 import java.security.Principal;
@@ -33,6 +30,10 @@ public class ListingController {
     @GetMapping()
     public ResponseEntity<List<MinimalListing>> getAllListings(){
         return new ResponseEntity<>(listingService.getAllListings(), HttpStatus.OK);
+    }
+    @PostMapping("/filter")
+    public ResponseEntity<List<MinimalListing>> getAllListingsByFilter(@RequestBody AdvanceFilteringRequest advanceFilteringRequest){
+        return new ResponseEntity<>(listingService.getFilteredListings(advanceFilteringRequest),HttpStatus.OK);
     }
 
     @GetMapping("/{listingUUID}")

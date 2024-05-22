@@ -37,6 +37,7 @@ public class ChatService {
         otherUser.addChat(currentUser.getUserUUID(), chat.getChatUUID());
         userService.saveUser(otherUser);
         userService.saveUser(currentUser);
+        log.info("New chat created");
         return createChatResponse(chat,otherUser);
 
     }
@@ -95,7 +96,7 @@ public class ChatService {
         chatRepository.deleteById(chatUUID);
     }
     public UnreadChatResponse checkForUnreadMessages(String tokenSubClaim) {
-        log.info("Checking for unread messages...");
+//        log.info("Checking for unread messages...");
         User user = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
         return new UnreadChatResponse(user.getUnreadChats().size());
     }
@@ -111,6 +112,7 @@ public class ChatService {
 
 
     }
+
     private ChatResponse createChatResponse (Chat chat, User otherUser){
         log.info("Creating chat response...");
         ChatResponse chatResponse = new ChatResponse();
@@ -126,9 +128,11 @@ public class ChatService {
     private MinimalChat chatToMinimalChat(Chat chat, User otherUser, User currentUser){
         MinimalChat minimalChat = new MinimalChat();
         minimalChat.setChatUUID(chat.getChatUUID());
-        minimalChat.setLastMessage(chat.getMessages().get(chat.getMessages().size() - 1).getMessageContent());
+        if (!chat.getMessages().isEmpty())
+            minimalChat.setLastMessage(chat.getMessages().get(chat.getMessages().size() - 1).getMessageContent());
         minimalChat.setHasUnreadMessages(currentUser.getUnreadChats().contains(chat.getChatUUID()));
-        minimalChat.setOtherUserProfilePicture(fileService.loadPicture(otherUser.getProfilePicturePath()));
+        if (otherUser.isHasProfilePicture())
+            minimalChat.setOtherUserProfilePicture(fileService.loadPicture(otherUser.getProfilePicturePath()));
         minimalChat.setOtherUsername(otherUser.getUsername());
         return minimalChat;
     }

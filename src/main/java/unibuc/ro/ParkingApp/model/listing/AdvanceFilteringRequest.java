@@ -4,23 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.UUID;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class MinimalListing {
-    String title;
-    byte[] mainPicture;
+public class AdvanceFilteringRequest {
     int sector;
-    UUID listingUUID;
     Date startDate;
     Date endDate;
-    LocalDateTime publishingDate;
-    int price;
-    int rating;
-    boolean available;
+    int maxDailyPrice;
+    int maxMonthlyPrice;
+    boolean indefinitePeriod;
 
 }

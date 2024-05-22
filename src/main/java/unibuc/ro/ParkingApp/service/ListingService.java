@@ -9,11 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.exception.FileNotDeleted;
 import unibuc.ro.ParkingApp.exception.ListingNotFound;
-import unibuc.ro.ParkingApp.model.listing.Listing;
-import unibuc.ro.ParkingApp.model.listing.ListingRequest;
+import unibuc.ro.ParkingApp.model.listing.*;
 import unibuc.ro.ParkingApp.model.PictureType;
-import unibuc.ro.ParkingApp.model.listing.ListingResponse;
-import unibuc.ro.ParkingApp.model.listing.MinimalListing;
 import unibuc.ro.ParkingApp.model.user.User;
 import unibuc.ro.ParkingApp.repository.ListingRepository;
 import unibuc.ro.ParkingApp.service.mapper.ListingMapper;
@@ -29,6 +26,7 @@ import java.util.UUID;
 
 public class ListingService {
     private static final Logger log = LoggerFactory.getLogger(ListingService.class);
+    private final ListingRepository listingRepository;
     ListingRepository repository;
     ListingMapper listingMapper;
     UserService userService;
@@ -40,6 +38,18 @@ public class ListingService {
         List<Listing> listingsFromDB = repository.findAll();
         return convertListingsToMinimalListings(listingsFromDB);
 
+    }
+    public List<MinimalListing> getFilteredListings(AdvanceFilteringRequest advanceFilteringRequest){
+        log.info("Getting filtered listings");
+        log.info("AdvanceFilteringRequest: {}", advanceFilteringRequest);
+        List<Listing> filteredListings = listingRepository.
+                findListingsByFilters(advanceFilteringRequest.getSector(),
+                        advanceFilteringRequest.getStartDate(),
+                        advanceFilteringRequest.getEndDate(),
+                        advanceFilteringRequest.getMaxDailyPrice(),
+                        advanceFilteringRequest.getMaxMonthlyPrice(),
+                        advanceFilteringRequest.isIndefinitePeriod());
+        return convertListingsToMinimalListings(filteredListings);
     }
 
     public ListingResponse getListingResponse(String tokenSubClaim, UUID listingId){

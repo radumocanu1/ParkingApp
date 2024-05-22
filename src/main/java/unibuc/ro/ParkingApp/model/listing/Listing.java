@@ -33,18 +33,26 @@ public class Listing {
     String latitude;
     String longitude;
     Date startDate;
+    Date endDate;
     int parkingSpotSlotNumber;
     int sector;
     String location;
+    String description;
+    boolean longTermRent;
+    int monthlyPrice;
     @JsonFormat(with = JsonFormat.Feature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,  shape = JsonFormat.Shape.STRING, pattern = "MM-dd HH:mm")
     LocalDateTime publishingDate;
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "pictures", joinColumns = @JoinColumn(name = "listingUUID"))
     @Column(name = "picture")
     private List<String> pictures;
-    // this will always be the "per/day" price
+    @ElementCollection(targetClass = Date.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "unavailable_dates", joinColumns = @JoinColumn(name = "listingUUID"))
+    @Column(name = "unavailable_dates")
+    private List<Date> unavailableDates;
     int price;
     int rating;
+    boolean available;
 
     public void addPicture(String picture, PictureType pictureType) {
         if (pictureType == PictureType.MAIN_PICTURE)

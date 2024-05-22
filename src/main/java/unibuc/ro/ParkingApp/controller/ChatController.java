@@ -21,30 +21,30 @@ public class ChatController {
     @Autowired
     ChatService chatService;
     @PostMapping("/{otherUserUUID}")
-    public ResponseEntity<ChatResponse> createChat(@PathVariable UUID otherUserUUID, Principal principal) {
+    public ResponseEntity<ChatResponse> createChat(@PathVariable String otherUserUUID, Principal principal) {
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
-        return new ResponseEntity<>(chatService.createChat((String) token.getTokenAttributes().get("sub"), otherUserUUID), HttpStatus.OK);
+        return new ResponseEntity<>(chatService.createChat((String) token.getTokenAttributes().get("sub"), UUID.fromString(otherUserUUID)), HttpStatus.OK);
     }
     @GetMapping()
     public ResponseEntity<List<Chat>> getChats() {
         return new ResponseEntity<>(chatService.getAllChats(), HttpStatus.OK);
     }
     @PostMapping("/send-message/{chatUUID}")
-    public ResponseEntity<Void> sendMessage(@PathVariable UUID chatUUID, @RequestBody MessageRequest messageRequest,Principal principal) {
+    public ResponseEntity<Void> sendMessage(@PathVariable String chatUUID, @RequestBody MessageRequest messageRequest,Principal principal) {
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
-        chatService.sendMessage(chatUUID,(String) token.getTokenAttributes().get("sub"),messageRequest);
+        chatService.sendMessage(UUID.fromString(chatUUID),(String) token.getTokenAttributes().get("sub"),messageRequest);
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
     @GetMapping("/try/{otherUserUUID}")
-    public ResponseEntity<ChatResponse> tryToGetChat(@PathVariable UUID otherUserUUID, Principal principal) {
+    public ResponseEntity<ChatResponse> tryToGetChat(@PathVariable String otherUserUUID, Principal principal) {
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
-        return new ResponseEntity<>(chatService.getChat(otherUserUUID,(String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+        return new ResponseEntity<>(chatService.getChat(UUID.fromString(otherUserUUID),(String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
     }
     @GetMapping("/{chatUUID}")
-    public ResponseEntity<ChatResponse> getChatById(@PathVariable UUID chatUUID, Principal principal) {
+    public ResponseEntity<ChatResponse> getChatById(@PathVariable String chatUUID, Principal principal) {
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
-        return new ResponseEntity<>(chatService.getChatById(chatUUID,(String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+        return new ResponseEntity<>(chatService.getChatById(UUID.fromString(chatUUID),(String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
     }
     @GetMapping("/user")
     public ResponseEntity<List<MinimalChat>> getChats(Principal principal){

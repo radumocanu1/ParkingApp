@@ -26,4 +26,8 @@ public class ListingRequest {
     int price;
     int sector;
     String location;
+    String description;
+    boolean longTermRent;
+    int monthlyPrice;
+    boolean available;
 }

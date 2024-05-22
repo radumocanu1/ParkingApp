@@ -37,8 +37,8 @@ public class UserController {
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
     @GetMapping("/{uuid}")
-    public ResponseEntity<User> getUser(@PathVariable UUID uuid){
-        return new ResponseEntity<>(userService.getUserById(uuid), HttpStatus.OK);
+    public ResponseEntity<User> getUser(@PathVariable String uuid){
+        return new ResponseEntity<>(userService.getUserById(UUID.fromString(uuid)), HttpStatus.OK);
 
     }
     @PutMapping()
