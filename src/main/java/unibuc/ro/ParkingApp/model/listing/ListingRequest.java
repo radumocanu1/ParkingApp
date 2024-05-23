@@ -17,7 +17,7 @@ public class ListingRequest {
     @NotBlank
     private String title;
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
 
     Date startDate;
     String latitude;

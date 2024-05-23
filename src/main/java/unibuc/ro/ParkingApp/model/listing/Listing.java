@@ -32,7 +32,9 @@ public class Listing {
     private String title;
     String latitude;
     String longitude;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     Date startDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     Date endDate;
     int parkingSpotSlotNumber;
     int sector;
