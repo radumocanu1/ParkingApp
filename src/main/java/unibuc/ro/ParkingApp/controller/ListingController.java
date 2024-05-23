@@ -1,5 +1,6 @@
 package unibuc.ro.ParkingApp.controller;
 
+import jakarta.ws.rs.PUT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +68,11 @@ public class ListingController {
     @GetMapping("/admin")
     public ResponseEntity<List<MinimalListing>> getAdminListings(){
         return new ResponseEntity<>(listingService.getAdminMinimalListings(), HttpStatus.OK);
+    }
+    @PutMapping("/admin/{listingUUID}")
+    public ResponseEntity<Void> updateListingStatus(@PathVariable String listingUUID,@RequestBody AdminUpdateListingStatusRequest adminUpdateListingStatusRequest){
+        listingService.updateListingStatusAdmin(UUID.fromString(listingUUID),adminUpdateListingStatusRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
     @DeleteMapping("/{listingUUID}")
     public ResponseEntity<String> deleteListing(@PathVariable String listingUUID){

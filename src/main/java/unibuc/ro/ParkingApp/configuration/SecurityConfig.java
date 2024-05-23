@@ -29,7 +29,7 @@ public class SecurityConfig {
         httpSecurity
                 .cors().and()
                 .authorizeHttpRequests(authorize -> authorize
-//                .requestMatchers("/user").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "admin")
+                .requestMatchers("/listing/admin").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "admin")
                 .requestMatchers("/user/**").authenticated()
                 .requestMatchers("/admin").hasAuthority(KeycloakJwtRolesConverter.PREFIX_RESOURCE_ROLE + "rest-api_admin")
                 .anyRequest().permitAll()

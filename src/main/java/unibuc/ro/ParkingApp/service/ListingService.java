@@ -25,7 +25,6 @@ import java.util.UUID;
 public class ListingService {
     private static final Logger log = LoggerFactory.getLogger(ListingService.class);
     private final ListingRepository listingRepository;
-    ListingRepository repository;
     ListingMapper listingMapper;
     UserService userService;
     OIDCUserMappingService oidcUserMappingService;
@@ -34,7 +33,7 @@ public class ListingService {
 
     public List<MinimalListing> getAllListings(){
         log.info("Getting all listings");
-        List<Listing> listingsFromDB = repository.findAll();
+        List<Listing> listingsFromDB = listingRepository.findAll();
         return convertListingsToMinimalListings(listingsFromDB.stream().filter(
                 (listing -> !listing.isLongTermRent() && listing.getStatus()!= Status.PENDING && listing.getStatus()!= Status.DEACTIVATED))
                 .toList());
@@ -70,7 +69,7 @@ public class ListingService {
         listing.setUser(publishingUser);
         listing.setPublishingDate(LocalDateTime.now());
         listing.setStatus(Status.PENDING);
-        repository.save(listing);
+        listingRepository.save(listing);
         log.info("createListing successful");
         return listing;
     }
@@ -81,7 +80,7 @@ public class ListingService {
         deleteListingPictures(listing);
         listing.setPictures(new ArrayList<>());
         listing.setMainPicture(null);
-        repository.save(listing);
+        listingRepository.save(listing);
         return listing;
     }
     public void deleteListing(UUID listingUUID){
@@ -89,21 +88,21 @@ public class ListingService {
         // todo check if request was done by publishing user or admin
         Listing listing = getListing(listingUUID);
         fileService.deleteDirectory(listingUUID);
-        repository.delete(listing);
+        listingRepository.delete(listing);
         log.info("successfully deleted listing!");
     }
     public synchronized void addPhotoToListing(UUID listingUUID, MultipartFile file, PictureType pictureType){
         log.info("Adding " + file.getOriginalFilename() + " to listing "  + listingUUID + " ..." );
         Listing listing = getListing(listingUUID);
         listing.addPicture(fileService.saveFile(listingUUID.toString(),file), pictureType);
-        repository.save(listing);
+        listingRepository.save(listing);
         log.info("Photo successfully added!" );
 
     }
 
 
     public Listing getListing(UUID uuid){
-        Optional<Listing> listingsFromDB = repository.findById(uuid);
+        Optional<Listing> listingsFromDB = listingRepository.findById(uuid);
         if (listingsFromDB.isEmpty()){
             throw new ListingNotFound(uuid.toString());
         }
@@ -123,16 +122,17 @@ public class ListingService {
         return convertListingsToMinimalListings(listings.stream()
                 .filter((listing -> listing.getStatus()== Status.PENDING)).toList());
     }
-    public void updateListingStatusAdmin(UUID listingUUID, AdminListingDecision adminListingDecision){
+    public void updateListingStatusAdmin(UUID listingUUID, AdminUpdateListingStatusRequest adminUpdateListingStatusRequest){
         Listing listing = getListing(listingUUID);
-        if (adminListingDecision == AdminListingDecision.ACCEPT){
+        UUID userUUID = listing.getUser().getUserUUID();
+        if (adminUpdateListingStatusRequest.getAdminListingDecision() == AdminListingDecision.ACCEPT){
             listing.setStatus(Status.ACTIVE);
             listingRepository.save(listing);
-            repository.save(listing);
         }
         else {
-            repository.delete(listing);
+            listingRepository.delete(listing);
         }
+        chatService.sendAdminMessage(userUUID,adminUpdateListingStatusRequest.getMessage());
 
 
     }
