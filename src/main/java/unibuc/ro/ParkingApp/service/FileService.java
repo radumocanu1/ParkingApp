@@ -53,12 +53,14 @@ public class FileService {
     // todo same as above
 
     public byte[] loadPicture(String picturePath) {
-        Path filePath = Paths.get(picturePath);
         try {
+            Path filePath = Paths.get(picturePath);
             return Files.readAllBytes(filePath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            //todo
+            System.out.println("Poza nu a fost gasita");
         }
+        return null;
     }
     public void deleteFile(String picturePath)  {
         Path filePath = Paths.get(picturePath);

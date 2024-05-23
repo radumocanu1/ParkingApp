@@ -22,5 +22,6 @@ public class MinimalListing {
     int price;
     int rating;
     boolean available;
+    Status status;
 
 }

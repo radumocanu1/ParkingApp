@@ -38,6 +38,7 @@ public class User {
     @JsonIgnore
     private Set<UUID> unreadChats = new HashSet<>();
 
+
     private boolean isTrusted;
     private double rating;
     private boolean hasProfilePicture ;

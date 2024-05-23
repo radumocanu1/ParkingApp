@@ -21,5 +21,6 @@ public class UserResponse {
     private String lastName;
     private String sex;
     private int age;
+    private boolean sameUser;
 
 }

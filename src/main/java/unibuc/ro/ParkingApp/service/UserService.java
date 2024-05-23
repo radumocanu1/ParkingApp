@@ -20,6 +20,7 @@ import java.util.UUID;
 @Service
 @Log
 public class UserService {
+    private final UserRepository userRepository;
     UserRepository repository;
     UserMapper userMapper;
     KeycloakAdminService keycloakAdminService;
@@ -59,6 +60,14 @@ public class UserService {
         User user = oidcUserMapping.getUser();
         return user.getListings();
     }
+    public UserProfilePictureResponse getUserProfilePicture(String tokenSubClaim){
+        log.info("Getting user profile picture...");
+        UUID userUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
+        UserProfilePictureDTO userProfilePictureDTO = userRepository.findProfilePictureInfoByUserUUID(userUUID);
+        if (userProfilePictureDTO.isHasProfilePicture())
+            return new UserProfilePictureResponse(fileService.loadPicture(userProfilePictureDTO.getProfilePicturePath()));
+        return new UserProfilePictureResponse(null);
+    }
     public User createUser(String tokenSubClaim, String tokenNameClaim, String tokenEmail){
         log.info("Creating user...");
         CreateUserRequest createUserRequest = new CreateUserRequest(tokenNameClaim, tokenEmail);
@@ -74,6 +83,15 @@ public class UserService {
 
     public User getUserById(UUID uuid){
         return tryToGetUser(uuid);
+    }
+    public UserResponse getUserResponseById(String tokenSubClaim,UUID uuid){
+        User user = tryToGetUser(uuid);
+        UserResponse userResponse = userMapper.userToUserResponse(user);
+        if (oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID().equals(uuid))
+            userResponse.setSameUser(true);
+        if(user.isHasProfilePicture())
+            userResponse.setProfilePictureBytes(fileService.loadPicture(user.getProfilePicturePath()));
+        return userResponse;
     }
     public UserResponse getUserProfile(String tokenSubClaim){
 

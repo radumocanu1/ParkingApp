@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.exception.FileNotDeleted;
 import unibuc.ro.ParkingApp.exception.ListingNotFound;
@@ -32,11 +30,14 @@ public class ListingService {
     UserService userService;
     OIDCUserMappingService oidcUserMappingService;
     FileService fileService;
+    ChatService chatService;
 
     public List<MinimalListing> getAllListings(){
         log.info("Getting all listings");
         List<Listing> listingsFromDB = repository.findAll();
-        return convertListingsToMinimalListings(listingsFromDB);
+        return convertListingsToMinimalListings(listingsFromDB.stream().filter(
+                (listing -> !listing.isLongTermRent() && listing.getStatus()!= Status.PENDING && listing.getStatus()!= Status.DEACTIVATED))
+                .toList());
 
     }
     public List<MinimalListing> getFilteredListings(AdvanceFilteringRequest advanceFilteringRequest){
@@ -68,6 +69,7 @@ public class ListingService {
         User publishingUser = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
         listing.setUser(publishingUser);
         listing.setPublishingDate(LocalDateTime.now());
+        listing.setStatus(Status.PENDING);
         repository.save(listing);
         log.info("createListing successful");
         return listing;
@@ -107,9 +109,32 @@ public class ListingService {
         }
         return listingsFromDB.get();
     }
-    public List<MinimalListing> getUserMinimalListings(String tokenSubClaim){
+    public List<MinimalListing> getCurrentUserMinimalListings(String tokenSubClaim){
         List<Listing> listings = userService.getUserListings(tokenSubClaim);
         return convertListingsToMinimalListings(listings);
+    }
+    public List<MinimalListing> getUserMinimalListings(UUID userUUID){
+        User user = userService.getUserById(userUUID);
+        return convertListingsToMinimalListings(user.getListings().stream()
+                .filter((listing -> listing.getStatus()!= Status.PENDING)).toList());
+    }
+    public List<MinimalListing> getAdminMinimalListings(){
+        List<Listing> listings = listingRepository.findAll();
+        return convertListingsToMinimalListings(listings.stream()
+                .filter((listing -> listing.getStatus()== Status.PENDING)).toList());
+    }
+    public void updateListingStatusAdmin(UUID listingUUID, AdminListingDecision adminListingDecision){
+        Listing listing = getListing(listingUUID);
+        if (adminListingDecision == AdminListingDecision.ACCEPT){
+            listing.setStatus(Status.ACTIVE);
+            listingRepository.save(listing);
+            repository.save(listing);
+        }
+        else {
+            repository.delete(listing);
+        }
+
+
     }
 
     private void addPicturesToListingResponse(ListingResponse listingResponse, List<String> pictures){

@@ -53,6 +53,7 @@ public class Listing {
     int price;
     int rating;
     boolean available;
+    Status status;
 
     public void addPicture(String picture, PictureType pictureType) {
         if (pictureType == PictureType.MAIN_PICTURE)

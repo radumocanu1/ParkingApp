@@ -41,10 +41,14 @@ public class ListingController {
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
         return new ResponseEntity<>(listingService.getListingResponse((String) token.getTokenAttributes().get("sub"),UUID.fromString(listingUUID)), HttpStatus.OK);
     }
-    @GetMapping("/userListings")
-    public ResponseEntity<List<MinimalListing>> getUserListings(Principal principal){
+    @GetMapping("/myListings")
+    public ResponseEntity<List<MinimalListing>> getCurrentUserListings(Principal principal){
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
-        return new ResponseEntity<>(listingService.getUserMinimalListings((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+        return new ResponseEntity<>(listingService.getCurrentUserMinimalListings((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+    }
+    @GetMapping("/userListings/{userUUID}")
+    public ResponseEntity<List<MinimalListing>> getUserListings(@PathVariable String userUUID){
+        return new ResponseEntity<>(listingService.getUserMinimalListings(UUID.fromString(userUUID)), HttpStatus.OK);
     }
     @PutMapping("/{listingUUID}")
     public ResponseEntity<Listing> updateListing(@PathVariable String listingUUID, @RequestBody ListingRequest listingRequest){
@@ -59,6 +63,10 @@ public class ListingController {
     public ResponseEntity<String> addMainPictureToListing(@PathVariable String listingUUID, @RequestBody MultipartFile file){
         listingService.addPhotoToListing(UUID.fromString(listingUUID), file, PictureType.MAIN_PICTURE);
         return new ResponseEntity<>(String.format(ApplicationConstants.LISTING_PHOTO_ADDED, listingUUID), HttpStatus.OK);
+    }
+    @GetMapping("/admin")
+    public ResponseEntity<List<MinimalListing>> getAdminListings(){
+        return new ResponseEntity<>(listingService.getAdminMinimalListings(), HttpStatus.OK);
     }
     @DeleteMapping("/{listingUUID}")
     public ResponseEntity<String> deleteListing(@PathVariable String listingUUID){
