@@ -42,13 +42,7 @@ public class ListingService {
     public List<MinimalListing> getFilteredListings(AdvanceFilteringRequest advanceFilteringRequest){
         log.info("Getting filtered listings");
         log.info("AdvanceFilteringRequest: {}", advanceFilteringRequest);
-        List<Listing> filteredListings = listingRepository.
-                findListingsByFilters(advanceFilteringRequest.getSector(),
-                        advanceFilteringRequest.getStartDate(),
-                        advanceFilteringRequest.getEndDate(),
-                        advanceFilteringRequest.getMaxDailyPrice(),
-                        advanceFilteringRequest.getMaxMonthlyPrice(),
-                        advanceFilteringRequest.isIndefinitePeriod());
+        List<Listing> filteredListings = listingRepository.findByAdvanceFiltering(advanceFilteringRequest);
         return convertListingsToMinimalListings(filteredListings);
     }
 
