@@ -42,7 +42,7 @@ public class CustomResponseEntityExceptionHandler {
     }
     @ExceptionHandler(PendingPaymentNotFound.class)
     public ResponseEntity<String> handlePendingPaymentNotFoundNotFoundError(PendingPaymentNotFound ex) {
-        return new ResponseEntity<>(ApplicationConstants.PENDING_PAYMENT_NOT_FOUND, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(ApplicationConstants.PENDING_PAYMENT_NOT_FOUND, HttpStatus.FORBIDDEN);
     }
 
 

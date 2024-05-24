@@ -13,6 +13,7 @@ import unibuc.ro.ParkingApp.model.user.User;
 import unibuc.ro.ParkingApp.repository.ListingRepository;
 import unibuc.ro.ParkingApp.service.mapper.ListingMapper;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +59,7 @@ public class ListingService {
     }
     public Listing createListing(ListingRequest listingRequest, String tokenSubClaim){
         log.info("createListing");
+        System.out.println(listingRequest);
         Listing listing = listingMapper.listingRequestToListing(listingRequest);
         User publishingUser = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
         listing.setUser(publishingUser);
@@ -104,6 +106,7 @@ public class ListingService {
     }
     public List<MinimalListing> getCurrentUserMinimalListings(String tokenSubClaim){
         List<Listing> listings = userService.getUserListings(tokenSubClaim);
+
         return convertListingsToMinimalListings(listings);
     }
     public List<MinimalListing> getUserMinimalListings(UUID userUUID){

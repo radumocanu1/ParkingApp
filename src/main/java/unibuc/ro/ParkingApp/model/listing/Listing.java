@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 import unibuc.ro.ParkingApp.model.PictureType;
 import unibuc.ro.ParkingApp.model.user.User;
 
@@ -33,8 +34,10 @@ public class Listing {
     String latitude;
     String longitude;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
     Date startDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
     Date endDate;
     int parkingSpotSlotNumber;
     int sector;
