@@ -20,6 +20,7 @@ public class PaymentController {
 
     @PostMapping("/create-checkout-session")
     public String createCheckoutSession(@RequestBody ListingPaymentRequest listingPaymentRequest, Principal principal) throws StripeException {
+        System.out.println(listingPaymentRequest);
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
         Session session = stripeService.createCheckoutSession((String) token.getTokenAttributes().get("sub"),listingPaymentRequest);
         return session.getId();

@@ -6,6 +6,7 @@ import lombok.*;
 import unibuc.ro.ParkingApp.model.chat.Chat;
 import unibuc.ro.ParkingApp.model.feedback.Feedback;
 import unibuc.ro.ParkingApp.model.listing.Listing;
+import unibuc.ro.ParkingApp.model.listing.ListingRentalDetails;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -48,7 +49,8 @@ public class User {
     private String lastName;
     private String sex;
     private int age;
-
+    @OneToMany(mappedBy = "user")
+    private Set<ListingRentalDetails> listingRentalDetails = new HashSet<>();
 
 
 

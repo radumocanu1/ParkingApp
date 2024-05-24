@@ -7,8 +7,6 @@ import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +16,6 @@ import unibuc.ro.ParkingApp.model.PendingPayment;
 import unibuc.ro.ParkingApp.model.listing.ListingPaymentRequest;
 import unibuc.ro.ParkingApp.repository.PendingPaymentsRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +31,7 @@ public class PaymentService {
     private final PendingPaymentsRepository pendingPaymentsRepository;
     private final OIDCUserMappingService oidcUserMappingService;
     private final ChatService chatService;
+    private final RentingService rentingService;
 
     @PostConstruct
     public void init() {
@@ -42,7 +40,7 @@ public class PaymentService {
     }
 
     public Session createCheckoutSession(String tokenSubClaim,ListingPaymentRequest listingPaymentRequest) throws StripeException {
-        addPaymentRequestToDB(tokenSubClaim,listingPaymentRequest.getListingUUID());
+        addPaymentRequestToDB(tokenSubClaim,listingPaymentRequest);
         SessionCreateParams params =
                 SessionCreateParams.builder()
                         .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
@@ -69,9 +67,12 @@ public class PaymentService {
 
         return Session.create(params);
     }
-    private void addPaymentRequestToDB( String tokenSubClaim, UUID listingUUID){
+    private void addPaymentRequestToDB( String tokenSubClaim, ListingPaymentRequest listingPaymentRequest){
         PendingPayment pendingPayment = new PendingPayment();
-        pendingPayment.setListingUUID(listingUUID);
+        pendingPayment.setListingUUID(listingPaymentRequest.getListingUUID());
+        pendingPayment.setStartDate(listingPaymentRequest.getStartDate());
+        pendingPayment.setEndDate(listingPaymentRequest.getEndDate());
+        pendingPayment.setCarNumber(listingPaymentRequest.getCarNumber());
         pendingPayment.setUserUUID(oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID());
         pendingPaymentsRepository.save(pendingPayment);
     }
@@ -79,10 +80,12 @@ public class PaymentService {
     public void acceptPayment(String tokenSubClaim){
         log.info("Payment accepted");
         UUID userUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
-        if(pendingPaymentsRepository.findByUserUUID(userUUID).isEmpty())
+        Optional<PendingPayment> pendingPaymentOptional = pendingPaymentsRepository.findByUserUUID(userUUID);
+        if(pendingPaymentOptional.isEmpty())
             throw new PendingPaymentNotFound();
+        PendingPayment pendingPayment = pendingPaymentOptional.get();
+        rentingService.rent(pendingPayment.getUserUUID(), pendingPayment.getListingUUID(),pendingPayment.getStartDate(), pendingPayment.getEndDate(), pendingPayment.getCarNumber() );
         chatService.sendAdminMessage(userUUID, ApplicationConstants.PAYMENT_ACCEPTED);
-        //todo add rent logic here
         pendingPaymentsRepository.deleteByUserUUID(userUUID);
         Optional<PendingPayment> remainingPayments = pendingPaymentsRepository.findByUserUUID(userUUID);
         if (remainingPayments.isEmpty()) {

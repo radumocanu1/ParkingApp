@@ -1,7 +1,6 @@
 package unibuc.ro.ParkingApp.model.listing;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,9 +11,7 @@ import unibuc.ro.ParkingApp.model.PictureType;
 import unibuc.ro.ParkingApp.model.user.User;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "listing")
@@ -29,6 +26,8 @@ public class Listing {
     @ManyToOne
     @JoinColumn(name = "userUUID", nullable = false)
     User user;
+    @OneToMany(mappedBy = "listing")
+    private Set<ListingRentalDetails> listingRentalDetails = new HashSet<>();
     private String mainPicture;
     private String title;
     String latitude;
@@ -61,6 +60,9 @@ public class Listing {
             this.mainPicture = picture;
         else
             this.pictures.add(picture);
+    }
+    public  void addListingRentalDetails(ListingRentalDetails listingRentalDetails) {
+        this.listingRentalDetails.add(listingRentalDetails);
     }
 
 
