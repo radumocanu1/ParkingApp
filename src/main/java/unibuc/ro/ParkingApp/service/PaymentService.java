@@ -5,17 +5,35 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
+import unibuc.ro.ParkingApp.exception.PendingPaymentNotFound;
+import unibuc.ro.ParkingApp.model.PendingPayment;
 import unibuc.ro.ParkingApp.model.listing.ListingPaymentRequest;
+import unibuc.ro.ParkingApp.repository.PendingPaymentsRepository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
+@Log
 public class PaymentService {
 
     @Value("${stripe.api.key}")
     private String apiKey;
     @Value("${frontend_client_base_url}")
     private String baseUrl;
+    private final PendingPaymentsRepository pendingPaymentsRepository;
+    private final OIDCUserMappingService oidcUserMappingService;
+    private final ChatService chatService;
 
     @PostConstruct
     public void init() {
@@ -23,13 +41,14 @@ public class PaymentService {
         Stripe.apiKey = System.getenv(apiKey);
     }
 
-    public Session createCheckoutSession(ListingPaymentRequest listingPaymentRequest) throws StripeException {
+    public Session createCheckoutSession(String tokenSubClaim,ListingPaymentRequest listingPaymentRequest) throws StripeException {
+        addPaymentRequestToDB(tokenSubClaim,listingPaymentRequest.getListingUUID());
         SessionCreateParams params =
                 SessionCreateParams.builder()
                         .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                         .setMode(SessionCreateParams.Mode.PAYMENT)
-                        .setSuccessUrl(baseUrl + "/success")
-                        .setCancelUrl(baseUrl + "/cancel")
+                        .setSuccessUrl(baseUrl + "/payment/success")
+                        .setCancelUrl(baseUrl + "/payment/cancel")
                         .addLineItem(
                                 SessionCreateParams.LineItem.builder()
                                         .setQuantity(1L)
@@ -49,5 +68,36 @@ public class PaymentService {
                         .build();
 
         return Session.create(params);
+    }
+    private void addPaymentRequestToDB( String tokenSubClaim, UUID listingUUID){
+        PendingPayment pendingPayment = new PendingPayment();
+        pendingPayment.setListingUUID(listingUUID);
+        pendingPayment.setUserUUID(oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID());
+        pendingPaymentsRepository.save(pendingPayment);
+    }
+    @Transactional
+    public void acceptPayment(String tokenSubClaim){
+        log.info("Payment accepted");
+        UUID userUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
+        if(pendingPaymentsRepository.findByUserUUID(userUUID).isEmpty())
+            throw new PendingPaymentNotFound();
+        chatService.sendAdminMessage(userUUID, ApplicationConstants.PAYMENT_ACCEPTED);
+        //todo add rent logic here
+        pendingPaymentsRepository.deleteByUserUUID(userUUID);
+        Optional<PendingPayment> remainingPayments = pendingPaymentsRepository.findByUserUUID(userUUID);
+        if (remainingPayments.isEmpty()) {
+            System.out.println("Pending payments successfully deleted.");
+        } else {
+            System.out.println("Failed to delete pending payments: " + remainingPayments);
+        }
+    }
+    @Transactional
+    public void rejectPayment(String tokenSubClaim){
+        log.info("Payment rejected");
+        UUID userUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
+        if(pendingPaymentsRepository.findByUserUUID(userUUID).isEmpty())
+            throw new PendingPaymentNotFound();
+        chatService.sendAdminMessage(userUUID, ApplicationConstants.PAYMENT_REJECTED);
+        pendingPaymentsRepository.deleteByUserUUID(userUUID);
     }
 }

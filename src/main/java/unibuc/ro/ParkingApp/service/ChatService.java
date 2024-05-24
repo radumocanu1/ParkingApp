@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
 import unibuc.ro.ParkingApp.exception.ChatNotFound;
 import unibuc.ro.ParkingApp.model.chat.*;
 import unibuc.ro.ParkingApp.model.user.User;
@@ -51,7 +52,7 @@ public class ChatService {
         Chat chat =  chatRepository.save(chatMapper.chatRequestToChat(chatRequest));
         user.addChat(UUID.fromString(adminUUID), chat.getChatUUID());
         userService.saveUser(user);
-        sendMessageToGenericAdminChat(user,"Bine ai venit la Parco, " + user.getUsername()+  "! Poti face X,Y,Z!");
+        sendMessageToGenericAdminChat(user,String.format(ApplicationConstants.GENERIC_WELCOME_MESSAGE_TEMPLATE,user.getUsername()));
 
     }
     public void sendMessage(UUID chatUUID, String tokenSubClaim, MessageRequest messageRequest) {
