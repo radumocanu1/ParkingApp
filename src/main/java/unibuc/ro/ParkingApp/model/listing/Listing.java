@@ -51,10 +51,6 @@ public class Listing {
     @CollectionTable(name = "pictures", joinColumns = @JoinColumn(name = "listingUUID"))
     @Column(name = "picture")
     private List<String> pictures;
-    @ElementCollection(targetClass = Date.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "unavailable_dates", joinColumns = @JoinColumn(name = "listingUUID"))
-    @Column(name = "unavailable_dates")
-    private List<Date> unavailableDates;
     int price;
     int rating;
     boolean available;
