@@ -34,6 +34,7 @@ public class ListingResponse {
     boolean myListing;
     String description;
     boolean longTermRent;
+    double rating;
     int monthlyPrice;
     Status status;
     String currentCarNumber;

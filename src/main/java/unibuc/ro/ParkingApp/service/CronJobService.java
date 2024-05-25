@@ -15,6 +15,7 @@ import unibuc.ro.ParkingApp.model.listing.ListingRentalDetails;
 import unibuc.ro.ParkingApp.repository.ListingRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -37,15 +38,18 @@ public class CronJobService {
         log.info("Running cron job...  updating listings...");
         List<Listing> listings = listingRepository.findAll();
         Date currentDate = new Date();
+        Date tomorrow = getNextDay();
+
 
         for (Listing listing : listings) {
             ListingRentalDetails mostRecentRentalDetails = listing.getMostRecentRentalDetails();
 
             if (mostRecentRentalDetails != null) {
-                if (isSameDay(mostRecentRentalDetails.getStartDate(),(currentDate))) {
+                // tomorrow is the first day to park
+                if (isSameDay(mostRecentRentalDetails.getStartDate(),tomorrow)) {
                     SetCurrentUserDetailsAndSendAdminMessages(listing, mostRecentRentalDetails, mostRecentRentalDetails);
                 }
-
+                // today was the last day of parking
                 if (isSameDay(mostRecentRentalDetails.getEndDate(),currentDate)) {
                     listing.getListingRentalDetails().remove(mostRecentRentalDetails);
                     chatService.sendAdminMessage(
@@ -56,9 +60,10 @@ public class CronJobService {
                             mostRecentRentalDetails.getListing().getUser().getUserUUID(),
                             String.format(ApplicationConstants.GENERIC_PARKING_SPOT_FREED, mostRecentRentalDetails.getCarNumber())
                     );
+                    // the next entry is the most recent rental now
                     if (!listing.getListingRentalDetails().isEmpty()) {
                         ListingRentalDetails nextRentalDetails = listing.getMostRecentRentalDetails();
-                        if (isSameDay(nextRentalDetails.getStartDate(),currentDate)) {
+                        if (isSameDay(nextRentalDetails.getStartDate(),tomorrow)) {
                             SetCurrentUserDetailsAndSendAdminMessages(listing, mostRecentRentalDetails, nextRentalDetails);
                         } else {
                             listing.setCurrentCarNumber(null);
@@ -97,6 +102,11 @@ public class CronJobService {
         LocalDate startLocalDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate endLocalDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return ChronoUnit.DAYS.between(startLocalDate, endLocalDate);
+    }
+    private Date getNextDay() {
+        LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+        return Date.from(tomorrow.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
 }

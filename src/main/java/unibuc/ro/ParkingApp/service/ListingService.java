@@ -16,10 +16,7 @@ import unibuc.ro.ParkingApp.service.mapper.ListingMapper;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,6 +43,9 @@ public class ListingService {
         log.info("Getting filtered listings");
         log.info("AdvanceFilteringRequest: {}", advanceFilteringRequest);
         List<Listing> filteredListings = listingRepository.findByAdvanceFiltering(advanceFilteringRequest);
+        if (advanceFilteringRequest.getEndDate() != null && advanceFilteringRequest.getStartDate() != null) {
+            removeOverlappingListingDate(filteredListings, advanceFilteringRequest.getStartDate(), advanceFilteringRequest.getEndDate());
+        }
         return convertListingsToMinimalListings(filteredListings);
     }
 
@@ -152,6 +152,21 @@ public class ListingService {
         chatService.sendAdminMessage(userUUID,adminUpdateListingStatusRequest.getMessage());
 
 
+    }
+    //todo solve this
+    private void removeOverlappingListingDate(List<Listing> listings, Date startDate, Date endDate){
+        for (Listing listing : listings) {
+            List<ListingRentalDetails> rentalDetails = listing.getListingRentalDetails();
+            for (ListingRentalDetails rentalDetail : rentalDetails) {
+                Date otherRentStartDate = rentalDetail.getStartDate();
+                Date otherRentEndDate = rentalDetail.getEndDate();
+                if ((startDate.before(otherRentEndDate) && startDate.after(otherRentStartDate)) ||
+                        (endDate.before(otherRentEndDate) && endDate.after(otherRentStartDate)) ||
+                        (startDate.before(otherRentStartDate)) && endDate.after(otherRentEndDate)) {
+                    listings.remove(listing);
+                }
+            }
+        }
     }
     private List<MinimalListing> convertListingRentalDetailsToMinimalListings(List<ListingRentalDetails> listingRentalDetails){
         List<Listing> listings = new ArrayList<>();
