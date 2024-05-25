@@ -10,10 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
 import unibuc.ro.ParkingApp.model.chat.Chat;
-import unibuc.ro.ParkingApp.model.user.UpdateUserRequest;
-import unibuc.ro.ParkingApp.model.user.User;
-import unibuc.ro.ParkingApp.model.user.UserProfilePictureResponse;
-import unibuc.ro.ParkingApp.model.user.UserResponse;
+import unibuc.ro.ParkingApp.model.user.*;
 import unibuc.ro.ParkingApp.service.UserService;
 
 import java.security.Principal;
@@ -34,8 +31,8 @@ public class UserController {
 
     }
     @GetMapping()
-    public ResponseEntity<List<User>> getAllUsers(){
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    public ResponseEntity<List<MinimalUser>> getAllUsers(){
+        return new ResponseEntity<>(userService.getMostAppreciatedUsers(), HttpStatus.OK);
     }
     @GetMapping("/profilePic")
     public ResponseEntity<UserProfilePictureResponse> getProfilePicture(Principal principal){

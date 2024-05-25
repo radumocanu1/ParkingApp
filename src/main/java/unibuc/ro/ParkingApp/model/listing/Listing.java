@@ -1,6 +1,7 @@
 package unibuc.ro.ParkingApp.model.listing;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 import unibuc.ro.ParkingApp.model.PictureType;
+import unibuc.ro.ParkingApp.model.feedback.Feedback;
 import unibuc.ro.ParkingApp.model.user.User;
 
 import java.time.LocalDateTime;
@@ -27,11 +29,12 @@ public class Listing {
     @JoinColumn(name = "userUUID", nullable = false)
     User user;
     @OneToMany(mappedBy = "listing")
-    private Set<ListingRentalDetails> listingRentalDetails = new HashSet<>();
+    private List<ListingRentalDetails> listingRentalDetails = new ArrayList<>();
     private String mainPicture;
     private String title;
     String latitude;
     String longitude;
+    String currentCarNumber;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     Date startDate;
@@ -50,8 +53,10 @@ public class Listing {
     @CollectionTable(name = "pictures", joinColumns = @JoinColumn(name = "listingUUID"))
     @Column(name = "picture")
     private List<String> pictures;
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Feedback> feedbackList = new ArrayList<>();
     int price;
-    int rating;
+    double rating;
     boolean available;
     Status status;
 
@@ -61,8 +66,25 @@ public class Listing {
         else
             this.pictures.add(picture);
     }
-    public  void addListingRentalDetails(ListingRentalDetails listingRentalDetails) {
-        this.listingRentalDetails.add(listingRentalDetails);
+    public void addFeedback(Feedback feedback) {
+        feedbackList.add(feedback);
+        user.computeNewRating();
+        computeNewRating();
+    }
+    private void computeNewRating() {
+        rating = feedbackList.stream()
+                .mapToDouble(Feedback::getRatingGiven)
+                .average()
+                .orElse(0);
+    }
+    public ListingRentalDetails getMostRecentRentalDetails (){
+        listingRentalDetails.sort(Comparator.comparing(ListingRentalDetails::getStartDate));
+        try{
+            return listingRentalDetails.get(0);
+        }
+        catch (IndexOutOfBoundsException e){
+            return null;
+        }
     }
 
 

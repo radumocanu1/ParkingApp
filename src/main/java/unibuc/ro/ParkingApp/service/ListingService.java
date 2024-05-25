@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.exception.FileNotDeleted;
 import unibuc.ro.ParkingApp.exception.ListingNotFound;
+import unibuc.ro.ParkingApp.model.chat.MinimalChat;
 import unibuc.ro.ParkingApp.model.listing.*;
 import unibuc.ro.ParkingApp.model.PictureType;
 import unibuc.ro.ParkingApp.model.user.User;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -69,6 +71,22 @@ public class ListingService {
         log.info("createListing successful");
         return listing;
     }
+    public List<MinimalListing> getUserRentedListings(String tokenSubClaim){
+        User user = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
+        List<ListingRentalDetails>  listingRentalDetails= user.getListingRentalDetails();
+        return convertListingRentalDetailsToMinimalListings(listingRentalDetails);
+
+    }
+    public List<DateRange> getUnavailableDates(UUID listingUUID) {
+        Listing listing = listingRepository.findById(listingUUID).orElse(null);
+        if (listing == null) {
+            throw new RuntimeException("Listing not found");
+        }
+
+        return listing.getListingRentalDetails().stream()
+                .map(details -> new DateRange(details.getStartDate(), details.getEndDate()))
+                .collect(Collectors.toList());
+    }
     public Listing updateListing(ListingRequest listingRequest, UUID listingUUID){
         Listing listing = getListing(listingUUID);
         listingMapper.fill(listingRequest,listing);
@@ -96,7 +114,9 @@ public class ListingService {
 
     }
 
-
+    public void saveListing(Listing listing){
+        listingRepository.save(listing);
+    }
     public Listing getListing(UUID uuid){
         Optional<Listing> listingsFromDB = listingRepository.findById(uuid);
         if (listingsFromDB.isEmpty()){
@@ -132,6 +152,16 @@ public class ListingService {
         chatService.sendAdminMessage(userUUID,adminUpdateListingStatusRequest.getMessage());
 
 
+    }
+    private List<MinimalListing> convertListingRentalDetailsToMinimalListings(List<ListingRentalDetails> listingRentalDetails){
+        List<Listing> listings = new ArrayList<>();
+        for (ListingRentalDetails listingRentalDetail : listingRentalDetails){
+            Listing listing = listingRentalDetail.getListing();
+            listing.setStartDate(listingRentalDetail.getStartDate());
+            listing.setEndDate(listingRentalDetail.getEndDate());
+            listings.add(listing);
+        }
+        return convertListingsToMinimalListings(listings);
     }
 
     private void addPicturesToListingResponse(ListingResponse listingResponse, List<String> pictures){

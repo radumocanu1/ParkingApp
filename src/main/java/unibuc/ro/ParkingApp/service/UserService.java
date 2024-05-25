@@ -6,15 +6,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.configuration.OIDC.Keycloak.KeycloakAdminService;
 import unibuc.ro.ParkingApp.exception.UserNotFound;
+import unibuc.ro.ParkingApp.model.chat.MinimalChat;
 import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.user.*;
 import unibuc.ro.ParkingApp.repository.UserRepository;
 import unibuc.ro.ParkingApp.service.mapper.UserMapper;
 
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @AllArgsConstructor
 @Service
@@ -27,12 +32,20 @@ public class UserService {
     FileService fileService;
     OIDCUserMappingService oidcUserMappingService;
 
-    public List<User> getAllUsers (){
+    public List<MinimalUser> getMostAppreciatedUsers() {
         List<User> usersFromDB = repository.findAll();
-        return usersFromDB.stream().toList();
-
+        return usersFromDB.stream()
+                .sorted(Comparator.comparing(User::getRating).reversed())
+                .limit(10)
+                .map(user -> {
+                    MinimalUser minimalUser = userMapper.userToMinimalUser(user);
+                    if (user.isHasProfilePicture()) {
+                        minimalUser.setProfilePicture(fileService.loadPicture(user.getProfilePicturePath()));
+                    }
+                    return minimalUser;
+                })
+                .collect(Collectors.toList());
     }
-
     public User updateUser(String tokenSubClaim, UpdateUserRequest updateUserRequest){
         log.info("Updating user... " + tokenSubClaim);
         OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
@@ -54,6 +67,7 @@ public class UserService {
         log.info("User successfully deleted");
 
     }
+
     public List<Listing> getUserListings(String tokenSubClaim){
         log.info("Getting user listings...");
         OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);

@@ -26,8 +26,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Listing> listings = new ArrayList<>();
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Feedback> feedbackList = new ArrayList<>();
+
     @ElementCollection
     @CollectionTable(name = "user_chats_mapping", joinColumns = @JoinColumn(name = "userUUID"))
     @MapKeyColumn(name = "chatKey")
@@ -38,8 +37,6 @@ public class User {
     @Column(name = "unread_chat")
     @JsonIgnore
     private Set<UUID> unreadChats = new HashSet<>();
-
-
     private boolean isTrusted;
     private double rating;
     private boolean hasProfilePicture ;
@@ -50,15 +47,24 @@ public class User {
     private String sex;
     private int age;
     @OneToMany(mappedBy = "user")
-    private Set<ListingRentalDetails> listingRentalDetails = new HashSet<>();
+    private List<ListingRentalDetails> listingRentalDetails = new ArrayList<>();
+
+    public List<ListingRentalDetails> getListingRentalDetails() {
+        listingRentalDetails.sort(Comparator.comparing(ListingRentalDetails::getStartDate));
+        return listingRentalDetails;
+    }
 
 
 
     public void computeNewRating() {
-        double averageRating = feedbackList.stream()
-                .mapToInt(Feedback::getRatingGiven)
-                .average()
-                .orElse(0);
+        List<Feedback> feedbacks = new ArrayList<>();
+        for (Listing listing : listings) {
+            feedbacks.addAll(listing.getFeedbackList());
+        }
+        double averageRating = feedbacks.stream()
+                .mapToInt((Feedback::getRatingGiven))
+                .average().orElse(0);
+
         DecimalFormat df = new DecimalFormat("#0.00");
         String formattedRating = df.format(averageRating);
 

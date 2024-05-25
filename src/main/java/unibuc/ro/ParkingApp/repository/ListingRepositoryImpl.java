@@ -32,23 +32,25 @@ public class ListingRepositoryImpl implements ListingRepositoryCustom {
         }
 
         if (request.getStartDate() != null) {
-            predicates.add(cb.greaterThanOrEqualTo(listing.get("startDate"), request.getStartDate()));
+            predicates.add(cb.lessThanOrEqualTo(listing.get("startDate"), request.getStartDate()));
         }
 
         if (request.getEndDate() != null) {
-            predicates.add(cb.lessThanOrEqualTo(listing.get("endDate"), request.getEndDate()));
+            predicates.add(cb.greaterThanOrEqualTo(listing.get("endDate"), request.getEndDate()));
         }
 
         if (request.getMaxDailyPrice() != 0) {
             predicates.add(cb.lessThanOrEqualTo(listing.get("price"), request.getMaxDailyPrice()));
         }
 
-        if (request.getMaxMonthlyPrice() != 0) {
+        if (request.getMaxMonthlyPrice() != 0 && listing.get("monthlyPrice") != null)  {
             predicates.add(cb.lessThanOrEqualTo(listing.get("monthlyPrice"), request.getMaxMonthlyPrice()));
         }
 
+
         if (request.isIndefinitePeriod()) {
             predicates.add(cb.isTrue(listing.get("longTermRent")));
+
         }
 
         cq.where(predicates.toArray(new Predicate[0]));

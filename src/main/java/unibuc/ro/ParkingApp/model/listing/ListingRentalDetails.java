@@ -1,6 +1,7 @@
 package unibuc.ro.ParkingApp.model.listing;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,10 +22,13 @@ public class ListingRentalDetails {
     @ManyToOne
     @MapsId("listingUUID")
     @JoinColumn(name = "listingUUID")
+    @JsonIgnore
     Listing listing;
     @ManyToOne
     @MapsId("userUUID")
     @JoinColumn(name = "userUUID")
+    @JsonIgnore
+
     User user;
     String carNumber;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -33,7 +37,6 @@ public class ListingRentalDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     Date endDate;
-
 
 
 

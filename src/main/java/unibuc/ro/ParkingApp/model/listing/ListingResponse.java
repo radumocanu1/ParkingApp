@@ -36,6 +36,7 @@ public class ListingResponse {
     boolean longTermRent;
     int monthlyPrice;
     Status status;
+    String currentCarNumber;
 
     public void addPicture(byte[] picture) {
         this.pictures.add(picture);

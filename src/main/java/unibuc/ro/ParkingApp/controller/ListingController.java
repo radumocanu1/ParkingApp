@@ -79,6 +79,15 @@ public class ListingController {
         listingService.deleteListing(UUID.fromString(listingUUID));
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    @GetMapping("/{listingUUID}/unavailable-dates")
+    public List<DateRange> getUnavailableDates(@PathVariable UUID listingUUID) {
+        return listingService.getUnavailableDates(listingUUID);
+    }
+    @GetMapping("/rented")
+    public ResponseEntity<List<MinimalListing>> getRentedListings(Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(listingService.getUserRentedListings((String) token.getTokenAttributes().get("sub")), HttpStatus.OK);
+    }
 
 
 }

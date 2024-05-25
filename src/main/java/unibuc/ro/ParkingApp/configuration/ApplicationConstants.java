@@ -12,5 +12,10 @@ public interface ApplicationConstants {
     String PAYMENT_ACCEPTED = "Plata efectuata a fost acceptata! Va rugam verificati sectiunea <Locuri inchiriate>";
     String PAYMENT_REJECTED= "Ne pare rau, se pare ca a fost o problema la procesarea platii... Va rugam sa incercati din nou, mai tarziu. Daca problema persista puteti incerca sa utilizati alt card pentru efectuarea tranzactiei si sa verificati soldul curent";
     String GENERIC_WELCOME_MESSAGE_TEMPLATE="Bine ai venit la Parco, %S! Poti face X,Y,Z!";
+    String GENERIC_START_PARKING_MESSAGE="Verifica sectiunea Locuri inchiriate, un nou loc a devenit disponibil si poti incepe sa parchezi pe el chiar de acum!";
+    String GENERIC_STOP_PARKING_MESSAGE="perioada de inchiriere a locului de parcare <%s> a expirat... Va rugam sa lasati un feedback in sectiunea anunturi inchiriate!";
+    String GENERIC_PARKING_SPOT_FREED="Masina cu numarul %s a incheiat de astazi parcarea pe locul dumneavoasta";
+
+    String GENERIC_PARKING_SPOT_OCCUPIED="Masina cu numarul %s va incepe de astazi sa parcheze pe locul de parcare postat de dumneavoastra <%s>. Intrega perioada inchiriata: %s zile";
 
 }
