@@ -65,6 +65,11 @@ public class ListingController {
         listingService.addPhotoToListing(UUID.fromString(listingUUID), file, PictureType.MAIN_PICTURE);
         return new ResponseEntity<>(String.format(ApplicationConstants.LISTING_PHOTO_ADDED, listingUUID), HttpStatus.OK);
     }
+    @PatchMapping("/status/{listingUUID}")
+    public ResponseEntity<Listing> modifyListingStatus(@PathVariable String listingUUID, @RequestBody ListingStatusChangeRequest listingStatusChangeRequest, Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        return new ResponseEntity<>(listingService.changeListingStatus((String) token.getTokenAttributes().get("sub"), UUID.fromString(listingUUID), listingStatusChangeRequest), HttpStatus.OK);
+    }
     @GetMapping("/admin")
     public ResponseEntity<List<MinimalListing>> getAdminListings(){
         return new ResponseEntity<>(listingService.getAdminMinimalListings(), HttpStatus.OK);

@@ -55,7 +55,7 @@ public class FeedbackService {
         }
         return feedbacks.stream()
                 .sorted(Comparator.comparing(Feedback::getPublishingDate).reversed())
-                .map((feedback -> createFeedbackResponse(feedback,user))).toList();
+                .map((feedback -> createFeedbackResponse(feedback,userService.getUserById(feedback.getAuthorUUID())))).toList();
 
     }
 

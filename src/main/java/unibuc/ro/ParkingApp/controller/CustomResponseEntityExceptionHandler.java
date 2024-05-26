@@ -44,6 +44,11 @@ public class CustomResponseEntityExceptionHandler {
     public ResponseEntity<String> handlePendingPaymentNotFoundNotFoundError(PendingPaymentNotFound ex) {
         return new ResponseEntity<>(ApplicationConstants.PENDING_PAYMENT_NOT_FOUND, HttpStatus.FORBIDDEN);
     }
+    @ExceptionHandler(OperationForbidden.class)
+    public ResponseEntity<String> handleOperationForbiddenError(OperationForbidden ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
 
 
     private Map<String, List<String>> getErrorsMap(List<String> errors) {

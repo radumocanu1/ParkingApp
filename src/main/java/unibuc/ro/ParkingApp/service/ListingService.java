@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import unibuc.ro.ParkingApp.exception.FileNotDeleted;
 import unibuc.ro.ParkingApp.exception.ListingNotFound;
+import unibuc.ro.ParkingApp.exception.OperationForbidden;
 import unibuc.ro.ParkingApp.model.chat.MinimalChat;
 import unibuc.ro.ParkingApp.model.listing.*;
 import unibuc.ro.ParkingApp.model.PictureType;
@@ -44,7 +45,7 @@ public class ListingService {
         log.info("AdvanceFilteringRequest: {}", advanceFilteringRequest);
         List<Listing> filteredListings = listingRepository.findByAdvanceFiltering(advanceFilteringRequest);
         if (advanceFilteringRequest.getEndDate() != null && advanceFilteringRequest.getStartDate() != null) {
-            removeOverlappingListingDate(filteredListings, advanceFilteringRequest.getStartDate(), advanceFilteringRequest.getEndDate());
+            filteredListings = removeOverlappingListingDate(filteredListings, advanceFilteringRequest.getStartDate(), advanceFilteringRequest.getEndDate());
         }
         return convertListingsToMinimalListings(filteredListings);
     }
@@ -129,6 +130,17 @@ public class ListingService {
 
         return convertListingsToMinimalListings(listings);
     }
+    public Listing changeListingStatus(String tokenSubClaim,UUID listingUUID, ListingStatusChangeRequest listingStatusChangeRequest){
+        UUID userUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
+        Listing listing = getListing(listingUUID);
+        if (!userUUID.equals(listing.getUser().getUserUUID())){
+            throw new OperationForbidden("Current user doesn't have rights to change this listing status!");
+        }
+        listing.setStatus(listingStatusChangeRequest.getStatus());
+        return listingRepository.save(listing);
+
+
+    }
     public List<MinimalListing> getUserMinimalListings(UUID userUUID){
         User user = userService.getUserById(userUUID);
         return convertListingsToMinimalListings(user.getListings().stream()
@@ -153,8 +165,8 @@ public class ListingService {
 
 
     }
-    //todo solve this
-    private void removeOverlappingListingDate(List<Listing> listings, Date startDate, Date endDate){
+    private List<Listing> removeOverlappingListingDate(List<Listing> listings, Date startDate, Date endDate){
+        List<Listing> availableListings = new ArrayList<>();
         for (Listing listing : listings) {
             List<ListingRentalDetails> rentalDetails = listing.getListingRentalDetails();
             for (ListingRentalDetails rentalDetail : rentalDetails) {
@@ -162,11 +174,15 @@ public class ListingService {
                 Date otherRentEndDate = rentalDetail.getEndDate();
                 if ((startDate.before(otherRentEndDate) && startDate.after(otherRentStartDate)) ||
                         (endDate.before(otherRentEndDate) && endDate.after(otherRentStartDate)) ||
-                        (startDate.before(otherRentStartDate)) && endDate.after(otherRentEndDate)) {
-                    listings.remove(listing);
+                        (startDate.before(otherRentStartDate)) && endDate.after(otherRentEndDate) ||
+                    startDate.equals(otherRentStartDate) || endDate.equals(otherRentEndDate) ||
+                    endDate.equals(otherRentStartDate) || startDate.equals(otherRentEndDate)) {
+                    continue;
                 }
+                availableListings.add(listing);
             }
         }
+        return availableListings;
     }
     private List<MinimalListing> convertListingRentalDetailsToMinimalListings(List<ListingRentalDetails> listingRentalDetails){
         List<Listing> listings = new ArrayList<>();

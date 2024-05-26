@@ -42,6 +42,11 @@ public class CronJobService {
 
 
         for (Listing listing : listings) {
+            //check if listing should be deleted
+            if (isSameDay(listing.getEndDate(), currentDate)) {
+                listingRepository.delete(listing);
+                continue;
+            }
             ListingRentalDetails mostRecentRentalDetails = listing.getMostRecentRentalDetails();
 
             if (mostRecentRentalDetails != null) {

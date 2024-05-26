@@ -7,15 +7,21 @@ import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.hibernate.NonUniqueResultException;
+import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException;
 import unibuc.ro.ParkingApp.configuration.ApplicationConstants;
 import unibuc.ro.ParkingApp.exception.PendingPaymentNotFound;
 import unibuc.ro.ParkingApp.model.PendingPayment;
+import unibuc.ro.ParkingApp.model.listing.Listing;
 import unibuc.ro.ParkingApp.model.listing.ListingPaymentRequest;
+import unibuc.ro.ParkingApp.model.user.User;
 import unibuc.ro.ParkingApp.repository.PendingPaymentsRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +38,7 @@ public class PaymentService {
     private final OIDCUserMappingService oidcUserMappingService;
     private final ChatService chatService;
     private final RentingService rentingService;
+    private final ListingService listingService;
 
     @PostConstruct
     public void init() {
@@ -80,12 +87,21 @@ public class PaymentService {
     public void acceptPayment(String tokenSubClaim){
         log.info("Payment accepted");
         UUID userUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();
-        Optional<PendingPayment> pendingPaymentOptional = pendingPaymentsRepository.findByUserUUID(userUUID);
+        Optional<PendingPayment> pendingPaymentOptional;
+        try {
+            pendingPaymentOptional = pendingPaymentsRepository.findByUserUUID(userUUID);
+        }catch (Exception e){
+            pendingPaymentsRepository.deleteAllByUserUUID(userUUID);
+            throw new RuntimeException();
+        }
         if(pendingPaymentOptional.isEmpty())
             throw new PendingPaymentNotFound();
         PendingPayment pendingPayment = pendingPaymentOptional.get();
         rentingService.rent(pendingPayment.getUserUUID(), pendingPayment.getListingUUID(),pendingPayment.getStartDate(), pendingPayment.getEndDate(), pendingPayment.getCarNumber() );
         chatService.sendAdminMessage(userUUID, ApplicationConstants.PAYMENT_ACCEPTED);
+        Listing listing = listingService.getListing(pendingPayment.getListingUUID());
+        User publishingUser = listing.getUser();
+        chatService.sendAdminMessage(publishingUser.getUserUUID(), String.format(ApplicationConstants.PARKING_SPOT_RENTED,publishingUser.getUsername(), listing.getTitle(), pendingPayment.getStartDate(), pendingPayment.getEndDate(), pendingPayment.getCarNumber()));
         pendingPaymentsRepository.deleteByUserUUID(userUUID);
         Optional<PendingPayment> remainingPayments = pendingPaymentsRepository.findByUserUUID(userUUID);
         if (remainingPayments.isEmpty()) {
@@ -103,4 +119,5 @@ public class PaymentService {
         chatService.sendAdminMessage(userUUID, ApplicationConstants.PAYMENT_REJECTED);
         pendingPaymentsRepository.deleteByUserUUID(userUUID);
     }
+
 }
