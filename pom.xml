@@ -9,9 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>unibuc.ro</groupId>
-	<artifactId>ParkingApp</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>ParkingApp</name>
+	<artifactId>parco</artifactId>
+	<packaging>jar</packaging>
+	<version>0.0.1</version>
+	<name>parco</name>
 	<description>Backend for Bachelor&apos;s project</description>
 	<properties>
 		<java.version>18</java.version>
