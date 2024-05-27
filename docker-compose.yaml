@@ -60,6 +60,8 @@ services:
       }'
     volumes:
       - .m2:/root/.m2
+      - ./listingPictures:/app/listingPictures
+      - ./profilePictures:/app/profilePictures
     stdin_open: true
     tty: true
 
