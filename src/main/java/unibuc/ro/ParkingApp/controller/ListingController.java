@@ -51,6 +51,10 @@ public class ListingController {
     public ResponseEntity<List<MinimalListing>> getUserListings(@PathVariable String userUUID){
         return new ResponseEntity<>(listingService.getUserMinimalListings(UUID.fromString(userUUID)), HttpStatus.OK);
     }
+    @GetMapping("/map")
+    public ResponseEntity<List<MapsListing>> getMapListings(){
+        return new ResponseEntity<>(listingService.getAllMapsListings(), HttpStatus.OK);
+    }
     @PutMapping("/{listingUUID}")
     public ResponseEntity<Listing> updateListing(@PathVariable String listingUUID, @RequestBody ListingRequest listingRequest){
         return new ResponseEntity<>(listingService.updateListing(listingRequest, UUID.fromString(listingUUID)),  HttpStatus.OK);

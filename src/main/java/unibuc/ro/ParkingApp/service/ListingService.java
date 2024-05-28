@@ -151,6 +151,16 @@ public class ListingService {
         return convertListingsToMinimalListings(listings.stream()
                 .filter((listing -> listing.getStatus()== Status.PENDING)).toList());
     }
+    public List<MapsListing> getAllMapsListings(){
+        List<Listing> listings = listingRepository.findAll();
+        List<MapsListing> mapsListings = new ArrayList<>();
+        for (Listing listing : listings) {
+            MapsListing mapsListing = listingMapper.listingToMapsListing(listing);
+            mapsListing.setMainPicture(fileService.loadPicture(listing.getMainPicture()));
+            mapsListings.add(mapsListing);
+        }
+        return mapsListings;
+    }
     public void updateListingStatusAdmin(UUID listingUUID, AdminUpdateListingStatusRequest adminUpdateListingStatusRequest){
         Listing listing = getListing(listingUUID);
         UUID userUUID = listing.getUser().getUserUUID();
