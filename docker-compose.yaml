@@ -40,7 +40,7 @@ services:
 
 
   parco-spring:
-    image: radumocanu02/parco-spring:0.0.4
+    image: radumocanu02/parco-spring:0.1.0
     depends_on:
       - keycloak
       - mysqldb
@@ -56,7 +56,8 @@ services:
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
         "spring.jpa.hibernate.ddl-auto" : "update",
         "spring.security.oauth2.resourceserver.jwt.issuer-uri" : "http://keycloak:8081/realms/Parco",
-        "spring.security.oauth2.resourceserver.jwt.jwk-set-uri" : "http://keycloak:8081/realms/Parco/protocol/openid-connect/certs"
+        "spring.security.oauth2.resourceserver.jwt.jwk-set-uri" : "http://$HOST_IP:8081/realms/Parco/protocol/openid-connect/certs",
+        "frontend_client_base_url" : "http://$HOST_IP"
       }'
     volumes:
       - .m2:/root/.m2
@@ -67,9 +68,7 @@ services:
 
 
   angular-app:
-    build:
-      context: /Users/licenta/amParcat/ParcoFrontend
-      dockerfile: Dockerfile
+    image: radumocanu02/parco-spring:0.1.0
     ports:
       - "80:80"
     depends_on:
