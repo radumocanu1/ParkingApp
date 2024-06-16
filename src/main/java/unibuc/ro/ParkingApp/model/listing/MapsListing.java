@@ -16,4 +16,7 @@ public class MapsListing {
     byte[] mainPicture;
     String title;
     int price;
+    boolean longTermRent;
+    int monthlyPrice;
+
 }
