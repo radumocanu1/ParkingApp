@@ -52,8 +52,6 @@ public class UserService {
         User existingUser = oidcUserMapping.getUser();
         userMapper.fill(updateUserRequest, existingUser);
         repository.save(existingUser);
-        // TODO decide whether keycloak admin should be used when updating users ( should keycloak values be different?)
-//        keycloakAdminService.updateUser(tokenSubClaim, existingUser.getUsername(), existingUser.getEmail());
         log.info("User successfully updated!");
         return existingUser;
     }

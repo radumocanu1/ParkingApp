@@ -83,7 +83,6 @@ public class PaymentService {
         pendingPayment.setUserUUID(oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID());
         pendingPaymentsRepository.save(pendingPayment);
     }
-    @Transactional
     public void acceptPayment(String tokenSubClaim){
         log.info("Payment accepted");
         UUID userUUID = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser().getUserUUID();

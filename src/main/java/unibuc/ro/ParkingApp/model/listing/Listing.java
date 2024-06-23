@@ -14,6 +14,7 @@ import unibuc.ro.ParkingApp.model.user.User;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "listing")
@@ -28,7 +29,7 @@ public class Listing {
     @ManyToOne
     @JoinColumn(name = "userUUID", nullable = false)
     User user;
-    @OneToMany(mappedBy = "listing")
+    @OneToMany(mappedBy = "listing",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ListingRentalDetails> listingRentalDetails = new ArrayList<>();
     private String mainPicture;
     private String title;
@@ -59,6 +60,7 @@ public class Listing {
     double rating;
     boolean available;
     Status status;
+    boolean rented;
 
     public void addPicture(String picture, PictureType pictureType) {
         if (pictureType == PictureType.MAIN_PICTURE)
@@ -77,14 +79,18 @@ public class Listing {
                 .average()
                 .orElse(0);
     }
-    public ListingRentalDetails getMostRecentRentalDetails (){
-        listingRentalDetails.sort(Comparator.comparing(ListingRentalDetails::getStartDate));
-        try{
-            return listingRentalDetails.get(0);
-        }
-        catch (IndexOutOfBoundsException e){
+    public ListingRentalDetails getMostRecentRentalDetails() {
+        List<ListingRentalDetails> activeRentals = listingRentalDetails.stream()
+                .filter(ListingRentalDetails::isActive).sorted(Comparator.comparing(ListingRentalDetails::getStartDate)).toList();
+        if (!activeRentals.isEmpty()) {
+            return activeRentals.get(0);
+        } else {
             return null;
         }
+    }
+
+    public void markListingRentalDetailsInactive (ListingRentalDetails rentalDetails) {
+        rentalDetails.setActive(false);
     }
 
 

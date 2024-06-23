@@ -37,6 +37,7 @@ public class ListingRentalDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     Date endDate;
+    boolean active;
 
 
 

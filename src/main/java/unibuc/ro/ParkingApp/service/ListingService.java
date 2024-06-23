@@ -120,7 +120,9 @@ public class ListingService {
     }
     public List<MinimalListing> getCurrentUserMinimalListings(String tokenSubClaim){
         List<Listing> listings = userService.getUserListings(tokenSubClaim);
-
+        for (Listing listing : listings) {
+            listing.setRented(listing.getMostRecentRentalDetails() != null);
+        }
         return convertListingsToMinimalListings(listings);
     }
     public Listing changeListingStatus(String tokenSubClaim,UUID listingUUID, ListingStatusChangeRequest listingStatusChangeRequest){

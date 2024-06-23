@@ -23,8 +23,7 @@ public class RentingService {
         ListingRentalDetailsKey rentalDetailsKey = new ListingRentalDetailsKey(userUUID, listingUUID);
         ListingRentalDetails rentalDetails = new ListingRentalDetails();
         rentalDetails.setListingRentalDetailsKey(rentalDetailsKey); // Set the composite key
-
-        // Set other fields
+        rentalDetails.setActive(true);
         rentalDetails.setUser(userService.getUserById(userUUID));
         rentalDetails.setListing(listingService.getListing(listingUUID));
         rentalDetails.setCarNumber(carNumber);

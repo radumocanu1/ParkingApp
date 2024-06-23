@@ -56,7 +56,7 @@ public class CronJobService {
                 }
                 // today was the last day of parking
                 if (isSameDay(mostRecentRentalDetails.getEndDate(),currentDate)) {
-                    listing.getListingRentalDetails().remove(mostRecentRentalDetails);
+                    listing.markListingRentalDetailsInactive(mostRecentRentalDetails);
                     chatService.sendAdminMessage(
                             mostRecentRentalDetails.getUser().getUserUUID(),
                             String.format(ApplicationConstants.GENERIC_STOP_PARKING_MESSAGE,mostRecentRentalDetails.getListing().getTitle())
@@ -66,8 +66,8 @@ public class CronJobService {
                             String.format(ApplicationConstants.GENERIC_PARKING_SPOT_FREED, mostRecentRentalDetails.getCarNumber())
                     );
                     // the next entry is the most recent rental now
-                    if (!listing.getListingRentalDetails().isEmpty()) {
-                        ListingRentalDetails nextRentalDetails = listing.getMostRecentRentalDetails();
+                    ListingRentalDetails nextRentalDetails = listing.getMostRecentRentalDetails();
+                    if (nextRentalDetails != null) {
                         if (isSameDay(nextRentalDetails.getStartDate(),tomorrow)) {
                             SetCurrentUserDetailsAndSendAdminMessages(listing, mostRecentRentalDetails, nextRentalDetails);
                         } else {
@@ -83,7 +83,6 @@ public class CronJobService {
                 listing.setCurrentCarNumber(null);
                 listing.setAvailable(true);
             }
-
             listingRepository.save(listing);
         }
     }

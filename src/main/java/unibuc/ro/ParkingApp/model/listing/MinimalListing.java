@@ -23,5 +23,6 @@ public class MinimalListing {
     int rating;
     boolean available;
     Status status;
+    boolean rented;
 
 }
