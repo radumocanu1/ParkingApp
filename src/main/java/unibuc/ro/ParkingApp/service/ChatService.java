@@ -124,16 +124,14 @@ public class ChatService {
         log.info("Getting chat by UUID...");
         User currentUser = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
         Chat chat =  getChat(chatUUID);
-        // check if this should be the generic admin chat
+        currentUser.removeUnreadMessage(chatUUID);
+        userService.saveUser(currentUser);
+        // check if this is the generic admin chat
         if (!chat.getUser1UUID().equals(UUID.fromString(adminUUID))){
             User otherUser = userService.getUserById(getOtherUserUUID(chat,currentUser.getUserUUID()));
-            currentUser.removeUnreadMessage(chatUUID);
-            userService.saveUser(currentUser);
             return createChatResponse(chat,otherUser);
         }
         // create generic admin chat response
-        currentUser.removeUnreadMessage(chatUUID);
-        userService.saveUser(currentUser);
         ChatResponse chatResponse = new ChatResponse();
         chatResponse.setMessages(chat.getMessages());
         return chatResponse;
@@ -176,6 +174,13 @@ public class ChatService {
         return createChatResponse(chat,otherUser);
 
 
+    }
+    public void deleteAllUserChats(String tokenSubClaim) {
+        List<MinimalChat> minimalChats = getAllUserChats(tokenSubClaim);
+        for (MinimalChat minimalChat : minimalChats) {
+            deleteChat(minimalChat.getChatUUID());
+        }
+        log.info("User chats deleted!");
     }
 
     private ChatResponse createChatResponse (Chat chat, User otherUser){

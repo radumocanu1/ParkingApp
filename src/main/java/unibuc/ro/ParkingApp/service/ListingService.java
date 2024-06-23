@@ -88,16 +88,7 @@ public class ListingService {
                 .map(details -> new DateRange(details.getStartDate(), details.getEndDate()))
                 .collect(Collectors.toList());
     }
-    public Listing updateListing(ListingRequest listingRequest, UUID listingUUID){
-        Listing listing = getListing(listingUUID);
-        listingMapper.fill(listingRequest,listing);
-        // todo maybe find a way to do this more optimal ( not just delete all pictures and them add them back)
-        deleteListingPictures(listing);
-        listing.setPictures(new ArrayList<>());
-        listing.setMainPicture(null);
-        listingRepository.save(listing);
-        return listing;
-    }
+
     public void deleteListing(UUID listingUUID){
         log.info("deleting listing with UUID {} ...", listingUUID);
         // todo check if request was done by publishing user or admin

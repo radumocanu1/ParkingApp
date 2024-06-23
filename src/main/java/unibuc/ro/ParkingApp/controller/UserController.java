@@ -72,6 +72,13 @@ public class UserController {
         userService.changeProfilePicture(subClaim, multipartFile);
         return new ResponseEntity<>(String.format(ApplicationConstants.PROFILE_PICTURE_UPDATED, subClaim), HttpStatus.OK);
     }
+    @DeleteMapping("/profilePic")
+    public ResponseEntity<String> deleteUserProfilePic(Principal principal){
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        String subClaim = (String) token.getTokenAttributes().get("sub");
+        userService.deleteProfilePicture(subClaim);
+        return new ResponseEntity<>(String.format(ApplicationConstants.PROFILE_PICTURE_DELETED, subClaim), HttpStatus.OK);
+    }
 
 
 }

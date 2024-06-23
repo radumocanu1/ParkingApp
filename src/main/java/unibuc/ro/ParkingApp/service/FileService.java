@@ -36,7 +36,6 @@ public class FileService {
     @SneakyThrows
     public String saveProfilePicture(UUID userUUID, MultipartFile file) {
         Path directoryPath = Paths.get(PROFILE_PICTURES_DIR);
-
         String fileExtension = getFileExtension(file.getOriginalFilename());
         String newFileName = userUUID + fileExtension;
         Path filePath = directoryPath.resolve(newFileName);
@@ -64,7 +63,9 @@ public class FileService {
     }
     public void deleteFile(String picturePath)  {
         Path filePath = Paths.get(picturePath);
-        if (!filePath.toFile().delete()){
+        try {
+            Files.delete(filePath);
+        } catch (IOException e) {
             throw new FileNotDeleted("Failed to delete picture");
         }
 

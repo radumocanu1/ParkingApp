@@ -64,6 +64,12 @@ public class ChatController {
     public ResponseEntity<Void> sendWelcomeMessage(Principal principal) {
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
         chatService.createGenericAdminChat((String)token.getTokenAttributes().get("sub"));
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteAllUserChats(Principal principal) {
+        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
+        chatService.deleteAllUserChats((String) token.getTokenAttributes().get("sub"));
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

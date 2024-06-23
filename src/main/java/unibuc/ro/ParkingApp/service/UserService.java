@@ -57,13 +57,12 @@ public class UserService {
         log.info("User successfully updated!");
         return existingUser;
     }
-    // todo chats should be deleted at this step ( currently not happening because of current internal implementation of many to many)
     public void deleteUser(String tokenSubClaim){
         log.info("Deleting user... " + tokenSubClaim);
         OIDCUserMapping oidcUserMapping = oidcUserMappingService.findBySubClaim(tokenSubClaim);
-        keycloakAdminService.deleteUser(tokenSubClaim);
         oidcUserMappingService.delete(oidcUserMapping);
         repository.delete(oidcUserMapping.getUser());
+        keycloakAdminService.deleteUser(tokenSubClaim);
         log.info("User successfully deleted");
 
     }
@@ -118,9 +117,14 @@ public class UserService {
         }
         return userResponse;
     }
-    public void updateUserRating(User user){
-        user.computeNewRating();
+    public void deleteProfilePicture(String tokenSubClaim){
+        log.info("Deleting user profile picture...");
+        User user = oidcUserMappingService.findBySubClaim(tokenSubClaim).getUser();
+        fileService.deleteFile(user.getProfilePicturePath());
+        user.setProfilePicturePath(null);
+        user.setHasProfilePicture(false);
         repository.save(user);
+        log.info("User profile picture successfully deleted");
     }
 
     public void changeProfilePicture(String tokenSubClaim, MultipartFile profilePicture){

@@ -55,10 +55,7 @@ public class ListingController {
     public ResponseEntity<List<MapsListing>> getMapListings(){
         return new ResponseEntity<>(listingService.getAllMapsListings(), HttpStatus.OK);
     }
-    @PutMapping("/{listingUUID}")
-    public ResponseEntity<Listing> updateListing(@PathVariable String listingUUID, @RequestBody ListingRequest listingRequest){
-        return new ResponseEntity<>(listingService.updateListing(listingRequest, UUID.fromString(listingUUID)),  HttpStatus.OK);
-    }
+
     @PatchMapping("/picture/{listingUUID}")
     public ResponseEntity<String> addPictureToListing(@PathVariable String listingUUID, @RequestBody MultipartFile file){
         listingService.addPhotoToListing(UUID.fromString(listingUUID), file, PictureType.REGULAR_PICTURE);
