@@ -43,7 +43,9 @@ public class ListingService {
     public List<MinimalListing> getFilteredListings(AdvanceFilteringRequest advanceFilteringRequest){
         log.info("Getting filtered listings");
         log.info("AdvanceFilteringRequest: {}", advanceFilteringRequest);
-        List<Listing> filteredListings = listingRepository.findByAdvanceFiltering(advanceFilteringRequest);
+        List<Listing> filteredListings = listingRepository.findByAdvanceFiltering(advanceFilteringRequest).stream().filter(
+                        listing -> listing.getStatus() == Status.ACTIVE)
+                .toList();
         if (advanceFilteringRequest.getEndDate() != null && advanceFilteringRequest.getStartDate() != null) {
             filteredListings = removeOverlappingListingDate(filteredListings, advanceFilteringRequest.getStartDate(), advanceFilteringRequest.getEndDate());
         }
@@ -143,7 +145,9 @@ public class ListingService {
                 .filter((listing -> listing.getStatus()== Status.PENDING)).toList());
     }
     public List<MapsListing> getAllMapsListings(){
-        List<Listing> listings = listingRepository.findAll();
+        List<Listing> listings = listingRepository.findAll()
+                .stream().filter((listing -> listing.getStatus() == Status.ACTIVE))
+                .toList();
         List<MapsListing> mapsListings = new ArrayList<>();
         for (Listing listing : listings) {
             MapsListing mapsListing = listingMapper.listingToMapsListing(listing);
@@ -167,7 +171,7 @@ public class ListingService {
 
     }
     private List<Listing> removeOverlappingListingDate(List<Listing> listings, Date startDate, Date endDate){
-        List<Listing> availableListings = new ArrayList<>();
+        List<Listing> availableListings = new ArrayList<>(listings);
         for (Listing listing : listings) {
             List<ListingRentalDetails> rentalDetails = listing.getListingRentalDetails();
             for (ListingRentalDetails rentalDetail : rentalDetails) {
@@ -178,9 +182,8 @@ public class ListingService {
                         (startDate.before(otherRentStartDate)) && endDate.after(otherRentEndDate) ||
                     startDate.equals(otherRentStartDate) || endDate.equals(otherRentEndDate) ||
                     endDate.equals(otherRentStartDate) || startDate.equals(otherRentEndDate)) {
-                    continue;
+                    availableListings.remove(listing);
                 }
-                availableListings.add(listing);
             }
         }
         return availableListings;
