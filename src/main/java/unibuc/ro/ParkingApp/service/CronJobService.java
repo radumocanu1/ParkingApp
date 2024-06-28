@@ -27,11 +27,11 @@ public class CronJobService {
     private static final Logger log = LoggerFactory.getLogger(CronJobService.class);
     private ListingRepository listingRepository;
     private ChatService chatService;
-    @EventListener(ApplicationReadyEvent.class)
-    @Transactional
-    public void onStartup() {
-        updateListings();
-    }
+//    @EventListener(ApplicationReadyEvent.class)
+//    @Transactional
+//    public void onStartup() {
+//        updateListings();
+//    }
     @Scheduled(cron = "0 0 23 * * ?") // Rulează zilnic la ora 23
     @Transactional
     public void updateListings() {
@@ -105,7 +105,7 @@ public class CronJobService {
     public long calculateDaysDifference(Date startDate, Date endDate) {
         LocalDate startLocalDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate endLocalDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return ChronoUnit.DAYS.between(startLocalDate, endLocalDate);
+        return ChronoUnit.DAYS.between(startLocalDate, endLocalDate) + 1;
     }
     private Date getNextDay() {
         LocalDate today = LocalDate.now();

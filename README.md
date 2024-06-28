@@ -4,3 +4,5 @@ sudo systemctl stop apache2
 change HOST_IP in .env
 sudo docker exec -it <container_name> /bin/sh
 cd usr/share/nginx/html/assets
+
+Latest version to be used: 0.2.2
