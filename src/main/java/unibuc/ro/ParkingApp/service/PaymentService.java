@@ -21,6 +21,8 @@ import unibuc.ro.ParkingApp.model.listing.ListingPaymentRequest;
 import unibuc.ro.ParkingApp.model.user.User;
 import unibuc.ro.ParkingApp.repository.PendingPaymentsRepository;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -100,7 +102,9 @@ public class PaymentService {
         chatService.sendAdminMessage(userUUID, ApplicationConstants.PAYMENT_ACCEPTED);
         Listing listing = listingService.getListing(pendingPayment.getListingUUID());
         User publishingUser = listing.getUser();
-        chatService.sendAdminMessage(publishingUser.getUserUUID(), String.format(ApplicationConstants.PARKING_SPOT_RENTED,publishingUser.getUsername(), listing.getTitle(), pendingPayment.getStartDate(), pendingPayment.getEndDate(), pendingPayment.getCarNumber()));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM");
+
+        chatService.sendAdminMessage(publishingUser.getUserUUID(), String.format(ApplicationConstants.PARKING_SPOT_RENTED,publishingUser.getUsername(), listing.getTitle(), pendingPayment.getStartDate().toInstant().atZone(ZoneId.systemDefault()).format(formatter), pendingPayment.getEndDate().toInstant().atZone(ZoneId.systemDefault()).format(formatter), pendingPayment.getCarNumber()));
         pendingPaymentsRepository.deleteByUserUUID(userUUID);
         Optional<PendingPayment> remainingPayments = pendingPaymentsRepository.findByUserUUID(userUUID);
         if (remainingPayments.isEmpty()) {

@@ -1,7 +1,5 @@
 version: '3.8'
 
-
-
 services:
   mysqldb:
     image: mysql:8
@@ -16,7 +14,6 @@ services:
     volumes:
       - db:/var/lib/mysql
 
-
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.3
     restart: unless-stopped
@@ -26,7 +23,7 @@ services:
       - DB_ADDR=mysqldb
       - DB_PORT=${MYSQL_PORT}
       - DB_DATABASE=${MYSQL_DATABASE}
-      - DB_USER={$MYSQL_USER}
+      - DB_USER=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
@@ -38,9 +35,8 @@ services:
     volumes:
       - keycloak_data:/opt/keycloak/data
 
-
   parco-spring:
-    image: radumocanu02/parco-spring:0.1.0
+    image: radumocanu02/parco-spring:0.2.3
     depends_on:
       - keycloak
       - mysqldb
@@ -50,33 +46,38 @@ services:
       - ${SPRING_PORT}:${SPRING_PORT}
     environment:
       SPRING_APPLICATION_JSON: '{
-        "spring.datasource.url"  : "jdbc:mysql://mysqldb:3307/$MYSQL_DATABASE?useSSL=false&allowPublicKeyRetrieval=true",
-        "spring.datasource.username" : "$MYSQL_USER",
-        "spring.datasource.password" : "$MYSQL_ROOT_PASSWORD",
+        "spring.datasource.url"  : "jdbc:mysql://mysqldb:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true",
+        "spring.datasource.username" : "${MYSQL_USER}",
+        "spring.datasource.password" : "${MYSQL_ROOT_PASSWORD}",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
         "spring.jpa.hibernate.ddl-auto" : "update",
-        "spring.security.oauth2.resourceserver.jwt.issuer-uri" : "http://keycloak:8081/realms/Parco",
-        "spring.security.oauth2.resourceserver.jwt.jwk-set-uri" : "http://$HOST_IP:8081/realms/Parco/protocol/openid-connect/certs",
+        "spring.security.oauth2.resourceserver.jwt.issuer-uri" : "http://${HOST_IP}:${KEYCLOAK_PORT}/realms/Parco",
+        "spring.security.oauth2.resourceserver.jwt.jwk-set-uri" : "http://${HOST_IP}:${KEYCLOAK_PORT}/realms/Parco/protocol/openid-connect/certs",
         "frontend_client_base_url" : "http://$HOST_IP"
       }'
     volumes:
       - .m2:/root/.m2
-      - ./listingPictures:/app/listingPictures
-      - ./profilePictures:/app/profilePictures
+      - ./listingPictures:/listingPictures
+      - ./profilePictures:/profilePictures
+      - spring_listing_pictures:/app/listingPictures
+      - spring_profile_pictures:/app/profilePictures
     stdin_open: true
     tty: true
 
-
   angular-app:
-    image: radumocanu02/parco-spring:0.1.0
+    image: radumocanu02/parco-angular:0.2.4
     ports:
       - "80:80"
     depends_on:
       - parco-spring
     environment:
       - NODE_ENV=production
-
+    volumes:
+      - angular_assets:/usr/share/nginx/html/assets
 
 volumes:
   db:
   keycloak_data:
+  spring_listing_pictures:
+  spring_profile_pictures:
+  angular_assets:

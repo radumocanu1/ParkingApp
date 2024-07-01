@@ -13,6 +13,5 @@ public class MinimalUser {
     UUID userUUID;
     String username;
     private byte[] profilePicture;
-
     private double rating;
 }

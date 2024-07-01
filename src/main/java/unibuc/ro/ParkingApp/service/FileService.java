@@ -22,6 +22,7 @@ public class FileService {
     // todo handle this with ResponseEntityExceptionHandler
     @SneakyThrows
     public String saveFile(String listingUUID, MultipartFile file) {
+        System.out.println(file.getOriginalFilename());
         Path directoryPath = Paths.get(LISTING_PICTURES_DIR, listingUUID);
         if (!Files.exists(directoryPath)) {
             Files.createDirectories(directoryPath);

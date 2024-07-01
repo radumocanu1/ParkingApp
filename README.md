@@ -5,4 +5,4 @@ change HOST_IP in .env
 sudo docker exec -it <container_name> /bin/sh
 cd usr/share/nginx/html/assets
 
-Latest version to be used: 0.2.2
+Latest version to be used: 0.3.1
