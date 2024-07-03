@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mysqldb:
     image: mysql:8
@@ -36,7 +34,7 @@ services:
       - keycloak_data:/opt/keycloak/data
 
   parco-spring:
-    image: radumocanu02/parco-spring:0.2.3
+    image: radumocanu02/parco-spring:0.3.4
     depends_on:
       - keycloak
       - mysqldb
@@ -65,7 +63,7 @@ services:
     tty: true
 
   angular-app:
-    image: radumocanu02/parco-angular:0.2.4
+    image: radumocanu02/parco-angular:0.3.3
     ports:
       - "80:80"
     depends_on:
